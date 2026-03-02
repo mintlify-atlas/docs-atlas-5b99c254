@@ -1,0 +1,69 @@
+{
+  "projectType": "frontend",
+  "projectName": "Mikunki Shapshico",
+  "projectDescription": "A festival website featuring live streaming, interactive chat, and event management for the UNHEVAL gastronomic and cultural festival in Huánuco, Peru.",
+  "theme": "almond",
+  "primaryColor": "#CC0000",
+  "lightColor": "#FF6600",
+  "darkColor": "#1A0000",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": [
+          "introduction",
+          "quickstart",
+          "installation"
+        ]
+      },
+      {
+        "group": "Features",
+        "pages": [
+          "features/live-streaming",
+          "features/chat-system",
+          "features/countdown-timer",
+          "features/gallery",
+          "features/event-timeline"
+        ]
+      },
+      {
+        "group": "Customization",
+        "pages": [
+          "customization/colors-and-branding",
+          "customization/content-configuration",
+          "customization/festival-date"
+        ]
+      },
+      {
+        "group": "Deployment",
+        "pages": [
+          "deployment/hosting",
+          "deployment/domain-setup"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Live streaming integration with Vimeo player",
+    "Twitch-style chat system with user registration and superchats",
+    "Real-time countdown timer to festival date",
+    "Interactive photo gallery with lightbox",
+    "Event timeline with schedule information",
+    "Particle effects and parallax animations",
+    "Mobile-responsive design",
+    "Social sharing functionality"
+  ],
+  "publicApiSurface": [
+    "CONFIG.STREAM_URL - Live stream URL configuration",
+    "CONFIG.IS_LIVE - Toggle live stream status",
+    "CONFIG.FESTIVAL_DATE - Festival date for countdown",
+    "CONFIG.PARTICLE_COUNT - Particle effect density",
+    "initParticles() - Initialize floating particles",
+    "initNavigation() - Setup navigation and menu",
+    "initCountdown() - Initialize countdown timer",
+    "initLiveStream() - Setup live streaming player",
+    "initChat() - Initialize chat system",
+    "initLightbox() - Setup gallery lightbox",
+    "CSS Variables: --red-main, --fire-1, --gold, etc."
+  ]
+}
