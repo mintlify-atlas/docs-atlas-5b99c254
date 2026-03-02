@@ -35,7 +35,8 @@
           "features/chat-system",
           "features/countdown-timer",
           "features/gallery",
-          "features/event-timeline"
+          "features/event-timeline",
+          "features/visual-effects"
         ]
       },
       {

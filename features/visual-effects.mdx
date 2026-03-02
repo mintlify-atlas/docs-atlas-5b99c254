@@ -1,0 +1,478 @@
+---
+title: Visual effects and animations
+description: Particle effects, parallax scrolling, typewriter animations, and interactive visual features
+---
+
+## Overview
+
+The Mikunki Shapshico website includes several visual effects and animations that enhance the user experience. These features are implemented purely with JavaScript and CSS, providing smooth, performant animations across all devices.
+
+## Reveal Animations
+
+The `initRevealAnimations()` function creates scroll-triggered fade-in animations with stagger effects for page elements.
+
+### How It Works
+
+```javascript script.js (lines 121-155)
+function initRevealAnimations() {
+  const revealEls = $$('.reveal');
+  
+  const revealObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        
+        // Revelar el contenedor principal
+        entry.target.classList.add('visible');
+        
+        // Stagger effect en children
+        const staggerTargets = entry.target.querySelectorAll(
+          '.highlight, .event-card, .shot, .sponsor-card, .up-card, .count-cell'
+        );
+        
+        staggerTargets.forEach((child, i) => {
+          child.style.opacity = '0';
+          child.style.transform = 'translateY(20px)';
+          child.style.transition = `opacity 0.5s ease ${i * 0.08}s, transform 0.5s ease ${i * 0.08}s`;
+          
+          requestAnimationFrame(() => {
+            child.style.opacity = '1';
+            child.style.transform = 'translateY(0)';
+          });
+        });
+        
+        revealObserver.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }
+  );
+  
+  revealEls.forEach((el) => revealObserver.observe(el));
+}
+```
+
+### Key Features
+
+- **Intersection Observer**: Triggers animations when elements enter viewport
+- **Stagger effect**: Child elements animate sequentially with 80ms delay between each
+- **Performance**: Uses `requestAnimationFrame` for smooth animations
+- **One-time trigger**: Unobserves elements after animation completes
+
+### Elements That Reveal
+
+The function automatically animates these child elements:
+- `.highlight` - Feature cards
+- `.event-card` - Timeline events
+- `.shot` - Gallery photos
+- `.sponsor-card` - Sponsor logos
+- `.up-card` - Upcoming event cards
+- `.count-cell` - Countdown timer digits
+
+### Configuration
+
+<ParamField path="threshold" type="number" default="0.15">
+  Percentage of element visibility required to trigger (15%)
+</ParamField>
+
+<ParamField path="rootMargin" type="string" default="'0px 0px -50px 0px'">
+  Margin around viewport for early/late triggering
+</ParamField>
+
+<ParamField path="stagger delay" type="number" default="0.08">
+  Delay between child animations in seconds (80ms)
+</ParamField>
+
+## Fire Video Slowdown
+
+The `initFireVideo()` function slows down background fire videos for a dramatic effect.
+
+```javascript script.js (lines 827-831)
+function initFireVideo() {
+  $$('.fire-video, .footer-fire-video').forEach((v) => {
+    v.playbackRate = 0.3;
+  });
+}
+```
+
+### Effect
+
+- Normal playback: 1.0x speed
+- Slowed playback: 0.3x speed (30% of normal)
+- Creates a cinematic, slow-motion fire effect
+
+### Customization
+
+Change the playback rate in the function:
+
+```javascript
+v.playbackRate = 0.5;  // 50% speed (faster)
+v.playbackRate = 0.2;  // 20% speed (slower)
+v.playbackRate = 1.0;  // Normal speed
+```
+
+<Note>
+  Lower values create more dramatic effects but may appear choppy if the video frame rate is too low. The default 0.3x provides a good balance.
+</Note>
+
+## Parallax Scrolling
+
+The `initParallax()` function creates a parallax effect on the hero section's fire video background.
+
+```javascript script.js (lines 837-861)
+function initParallax() {
+  const hero = $('#hero');
+  const fireVideo = $('#heroFire');
+  
+  if (!hero || !fireVideo) return;
+  
+  let ticking = false;
+  
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        const heroHeight = hero.offsetHeight;
+        
+        if (scrollY < heroHeight) {
+          // Parallax para el video de fuego
+          fireVideo.style.transform = `translateY(${scrollY * 0.3}px)`;
+        }
+        
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+}
+```
+
+### How It Works
+
+1. Listens to scroll events
+2. Calculates scroll position
+3. Translates video vertically at 0.3x scroll speed
+4. Creates depth perception as video moves slower than page
+
+### Parallax Factor
+
+The multiplier `0.3` controls the parallax intensity:
+
+```javascript
+scrollY * 0.3  // Subtle parallax (default)
+scrollY * 0.5  // Moderate parallax
+scrollY * 0.7  // Strong parallax
+scrollY * 0.1  // Very subtle
+```
+
+### Performance
+
+- Uses `requestAnimationFrame` to batch DOM updates
+- Throttles with `ticking` flag to prevent multiple simultaneous updates
+- Passive event listener for better scroll performance
+- Only runs within hero section bounds
+
+## Typewriter Effect
+
+The `initTypewriter()` function creates a typing animation for the hero subtitle text.
+
+```javascript script.js (lines 867-888)
+function initTypewriter() {
+  const heroSub = $('.hero-sub');
+  if (!heroSub) return;
+  
+  const text = heroSub.textContent;
+  heroSub.textContent = '';
+  heroSub.style.opacity = '1';
+  
+  let i = 0;
+  const speed = 50;
+  
+  function type() {
+    if (i < text.length) {
+      heroSub.textContent += text.charAt(i);
+      i++;
+      setTimeout(type, speed);
+    }
+  }
+  
+  // Iniciar después de un pequeño delay
+  setTimeout(type, 800);
+}
+```
+
+### Configuration
+
+<ParamField path="speed" type="number" default="50">
+  Milliseconds between each character (50ms = 20 characters/second)
+</ParamField>
+
+<ParamField path="initial delay" type="number" default="800">
+  Milliseconds before typing starts (800ms)
+</ParamField>
+
+### Customization
+
+Adjust typing speed and timing:
+
+```javascript
+const speed = 30;   // Faster typing (33 chars/sec)
+const speed = 100;  // Slower typing (10 chars/sec)
+
+setTimeout(type, 1500);  // Start after 1.5 seconds
+setTimeout(type, 0);     // Start immediately
+```
+
+## Share Button
+
+The `initShareStreamButton()` function enables social sharing of the live stream with native APIs and fallbacks.
+
+```javascript script.js (lines 894-1004)
+function initShareStreamButton() {
+  const shareBtn = $('.share-stream-btn');
+  if (!shareBtn) return;
+
+  const sharePayload = {
+    title: 'Mikunki Shapshico - EN VIVO',
+    text: '¡Mira la transmisión oficial de Mikunki Shapshico! 🔥🍖',
+    url: location.href
+  };
+  
+  // ... sharing logic
+}
+```
+
+### Features
+
+1. **Native Share API**: Uses `navigator.share()` on mobile devices
+2. **Clipboard Fallback**: Copies URL if native sharing unavailable
+3. **Legacy Support**: Falls back to `document.execCommand('copy')` for older browsers
+4. **Visual Feedback**: Shows checkmark icon and toast notification
+5. **Busy State**: Prevents multiple simultaneous share attempts
+
+### Share Payload
+
+<ParamField path="title" type="string">
+  Title shown in native share dialog
+</ParamField>
+
+<ParamField path="text" type="string">
+  Message shared along with URL
+</ParamField>
+
+<ParamField path="url" type="string">
+  URL to share (defaults to current page)
+</ParamField>
+
+### Customization
+
+Update the share message:
+
+```javascript
+const sharePayload = {
+  title: 'Your Festival Name - LIVE',
+  text: 'Watch our festival live stream!',
+  url: 'https://your-domain.com'
+};
+```
+
+## Reminder Buttons
+
+The `initReminderButtons()` function adds interactive feedback to event reminder buttons with confetti effects.
+
+```javascript script.js (lines 1010-1028)
+function initReminderButtons() {
+  $$('.up-card button').forEach((btn) => {
+    btn.addEventListener('click', function() {
+      const originalHTML = this.innerHTML;
+      this.innerHTML = '<i class="fa-solid fa-check"></i> Listo';
+      this.style.background = 'rgba(0, 212, 170, 0.3)';
+      this.style.borderColor = '#00D4AA';
+      
+      // Crear confetti
+      createConfetti(this);
+      
+      setTimeout(() => {
+        this.innerHTML = originalHTML;
+        this.style.background = '';
+        this.style.borderColor = '';
+      }, 2000);
+    });
+  });
+}
+```
+
+### Button States
+
+<Tabs>
+  <Tab title="Default State">
+    - Icon: Bell
+    - Text: "Recordar"
+    - Style: Default button styling
+  </Tab>
+  
+  <Tab title="Active State (2 seconds)">
+    - Icon: Checkmark
+    - Text: "Listo"
+    - Background: `rgba(0, 212, 170, 0.3)` (teal)
+    - Border: `#00D4AA` (bright teal)
+    - Confetti animation triggered
+  </Tab>
+</Tabs>
+
+### Customization
+
+Change the active state duration:
+
+```javascript
+setTimeout(() => {
+  // Reset button
+}, 3000);  // 3 seconds instead of 2
+```
+
+## Confetti Animation
+
+The `createConfetti()` function generates particle explosions for button interactions.
+
+```javascript script.js (lines 1034-1078)
+function createConfetti(element) {
+  const rect = element.getBoundingClientRect();
+  const colors = ['#FFD700', '#FF6600', '#FF3333', '#FFFFFF', '#00D4AA'];
+  
+  for (let i = 0; i < 20; i++) {
+    const confetti = document.createElement('div');
+    confetti.style.cssText = `
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      left: ${rect.left + rect.width / 2}px;
+      top: ${rect.top}px;
+      border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+      pointer-events: none;
+      z-index: 9999;
+    `;
+    document.body.appendChild(confetti);
+    
+    // Animation logic...
+  }
+}
+```
+
+### Configuration
+
+<ParamField path="particle count" type="number" default="20">
+  Number of confetti particles generated
+</ParamField>
+
+<ParamField path="colors" type="array">
+  Array of hex colors for random selection
+</ParamField>
+
+<ParamField path="particle size" type="string" default="8px">
+  Width and height of each particle
+</ParamField>
+
+### Physics
+
+The confetti animation includes realistic physics:
+
+- **Angle**: Random angle between -90° and +90°
+- **Velocity**: Random velocity between 5-10 pixels/frame
+- **Decay**: Velocity decreases by 5% each frame (gravity simulation)
+- **Fade**: Opacity decreases by 0.02 per frame
+- **Rotation**: Particles rotate based on horizontal position
+- **Shapes**: 50% circles, 50% squares (random)
+
+### Customization
+
+<Accordion title="Change particle count">
+  ```javascript
+  for (let i = 0; i < 40; i++) {  // More confetti
+    // ...
+  }
+  ```
+</Accordion>
+
+<Accordion title="Change colors">
+  ```javascript
+  const colors = [
+    '#FF1493',  // Pink
+    '#00BFFF',  // Sky blue
+    '#FFD700',  // Gold
+    '#7FFF00',  // Chartreuse
+    '#FF4500'   // Orange-red
+  ];
+  ```
+</Accordion>
+
+<Accordion title="Change animation duration">
+  ```javascript
+  opacity -= 0.01;  // Slower fade (lasts longer)
+  opacity -= 0.05;  // Faster fade (shorter duration)
+  ```
+</Accordion>
+
+## Performance Considerations
+
+All visual effects are optimized for performance:
+
+### Reveal Animations
+- Uses Intersection Observer API (efficient scroll detection)
+- Unobserves elements after animation (frees memory)
+- Uses `requestAnimationFrame` for smooth transitions
+
+### Parallax
+- Throttled with `ticking` flag
+- Passive event listeners
+- Only runs within hero section
+
+### Typewriter
+- Simple `setTimeout` recursion
+- No continuous intervals
+- Minimal DOM manipulation
+
+### Confetti
+- Uses `requestAnimationFrame` for 60fps animation
+- Auto-removes particles when complete
+- Fixed positioning for GPU acceleration
+
+<Tip>
+  **Reduced Motion**: The particle system respects `prefers-reduced-motion` media query. Users with motion sensitivity won't see floating particles.
+</Tip>
+
+## Disabling Effects
+
+To disable specific effects, comment out the initialization in the DOMContentLoaded event (lines 1084-1101):
+
+```javascript script.js
+document.addEventListener("DOMContentLoaded", () => {
+  initParticles();
+  initNavigation();
+  // initRevealAnimations();  // Disabled
+  initCountdown();
+  initLiveStream();
+  initLiveLayoutSync();
+  initMobilePlayerInfoToggle();
+  initLightbox();
+  initChat();
+  // initFireVideo();  // Disabled
+  initReminderButtons();
+  // initParallax();  // Disabled
+  // initTypewriter();  // Disabled
+  initShareStreamButton();
+});
+```
+
+## Browser Support
+
+All effects use modern web APIs with fallbacks:
+
+- **Intersection Observer**: Supported in all modern browsers
+- **requestAnimationFrame**: Universal support
+- **Native Share API**: Mobile only (desktop falls back to clipboard)
+- **Clipboard API**: Modern browsers (legacy fallback included)
+- **CSS transforms**: Universal support
+
+<Warning>
+  **Internet Explorer**: These effects are not designed for IE. The site will function but animations may not work. Consider adding polyfills if IE support is required.
+</Warning>
