@@ -1,0 +1,409 @@
+---
+title: 'Countdown Timer'
+description: 'Real-time countdown timer to the festival date with auto-updating display'
+---
+
+# Countdown Timer
+
+A real-time countdown timer that displays days, hours, minutes, and seconds until the festival begins.
+
+## Overview
+
+The countdown timer:
+- **Updates every second** with precise calculations
+- **Auto-stops** when the festival date arrives
+- **Responsive design** with horizontal cell layout
+- **Animated separators** with blinking colons
+- **Integrated with CONFIG** for centralized date management
+
+## Configuration
+
+<ParamField path="FESTIVAL_DATE" type="Date" required>
+  The target date and time for the countdown.
+  
+  ```javascript
+  const CONFIG = {
+    FESTIVAL_DATE: new Date("2025-11-18T10:00:00")
+  };
+  ```
+  
+  **Format:** ISO 8601 string (YYYY-MM-DDTHH:mm:ss)
+  
+  **Timezone:** Uses the user's local timezone
+</ParamField>
+
+## Core Function
+
+### initCountdown()
+
+Initializes and manages the countdown timer.
+
+**Location:** `script.js:161`
+
+```javascript
+function initCountdown() {
+  const daysEl = $("#days");
+  const hoursEl = $("#hours");
+  const minutesEl = $("#minutes");
+  const secondsEl = $("#seconds");
+
+  if (!daysEl || !hoursEl || !minutesEl || !secondsEl) return;
+
+  function updateCounter() {
+    const now = Date.now();
+    const diff = Math.max(0, CONFIG.FESTIVAL_DATE.getTime() - now);
+    
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const m = Math.floor((diff / (1000 * 60)) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+
+    daysEl.textContent = String(d).padStart(2, "0");
+    hoursEl.textContent = String(h).padStart(2, "0");
+    minutesEl.textContent = String(m).padStart(2, "0");
+    secondsEl.textContent = String(s).padStart(2, "0");
+  }
+
+  // Initial update
+  updateCounter();
+  
+  // Set interval
+  const interval = setInterval(() => {
+    const now = Date.now();
+    const diff = CONFIG.FESTIVAL_DATE.getTime() - now;
+    
+    if (diff <= 0) {
+      clearInterval(interval);
+      daysEl.textContent = "00";
+      hoursEl.textContent = "00";
+      minutesEl.textContent = "00";
+      secondsEl.textContent = "00";
+      return;
+    }
+    
+    updateCounter();
+  }, 1000);
+}
+```
+
+### Calculation Logic
+
+**Time Difference:**
+```javascript
+const diff = Math.max(0, CONFIG.FESTIVAL_DATE.getTime() - Date.now());
+```
+- `Math.max(0, ...)` prevents negative values
+- `getTime()` returns milliseconds since epoch
+
+**Component Extraction:**
+```javascript
+const d = Math.floor(diff / (1000 * 60 * 60 * 24));  // Days
+const h = Math.floor((diff / (1000 * 60 * 60)) % 24); // Hours (0-23)
+const m = Math.floor((diff / (1000 * 60)) % 60);      // Minutes (0-59)
+const s = Math.floor((diff / 1000) % 60);             // Seconds (0-59)
+```
+
+**Formatting:**
+```javascript
+String(d).padStart(2, "0") // "7" → "07"
+```
+
+### Auto-Stop Behavior
+
+When the countdown reaches zero:
+
+```javascript
+if (diff <= 0) {
+  clearInterval(interval);  // Stop the interval
+  daysEl.textContent = "00";
+  hoursEl.textContent = "00";
+  minutesEl.textContent = "00";
+  secondsEl.textContent = "00";
+  return;
+}
+```
+
+## HTML Structure
+
+```html
+<div class="countdown" aria-label="Cuenta regresiva al festival">
+  <div class="count-cell">
+    <strong id="days">00</strong>
+    <span>Días</span>
+  </div>
+  <span class="count-separator">:</span>
+  
+  <div class="count-cell">
+    <strong id="hours">00</strong>
+    <span>Horas</span>
+  </div>
+  <span class="count-separator">:</span>
+  
+  <div class="count-cell">
+    <strong id="minutes">00</strong>
+    <span>Min</span>
+  </div>
+  <span class="count-separator">:</span>
+  
+  <div class="count-cell">
+    <strong id="seconds">00</strong>
+    <span>Seg</span>
+  </div>
+</div>
+```
+
+### Required IDs
+
+<ParamField path="#days" type="element" required>
+  Displays the days value (00-99+)
+</ParamField>
+
+<ParamField path="#hours" type="element" required>
+  Displays the hours value (00-23)
+</ParamField>
+
+<ParamField path="#minutes" type="element" required>
+  Displays the minutes value (00-59)
+</ParamField>
+
+<ParamField path="#seconds" type="element" required>
+  Displays the seconds value (00-59)
+</ParamField>
+
+## CSS Styling
+
+### Count Cells
+
+```css
+.countdown {
+  margin: 2rem auto 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.count-cell {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 0.8rem 1.2rem;
+  text-align: center;
+  backdrop-filter: blur(4px);
+  min-width: 80px;
+}
+
+.count-cell strong {
+  display: block;
+  font-family: var(--heading); /* Bebas Neue */
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(255, 200, 0, 0.4);
+  color: var(--white);
+  letter-spacing: -0.02em;
+}
+
+.count-cell span {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+}
+```
+
+### Animated Separators
+
+```css
+.count-separator {
+  font-family: var(--heading);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1;
+  color: var(--gold);
+  padding-top: 0.5rem;
+  animation: separatorBlink 1s infinite;
+}
+
+@keyframes separatorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+```
+
+## CSS Variables
+
+Customize the countdown appearance:
+
+```css
+:root {
+  --heading: "Bebas Neue", sans-serif; /* Number font */
+  --body: "Poppins", sans-serif;      /* Label font */
+  --white: #FFFFFF;
+  --gold: #FFD700;                     /* Separator color */
+}
+```
+
+## Responsive Design
+
+### Mobile (< 768px)
+
+```css
+@media (max-width: 767px) {
+  .countdown {
+    gap: 0.2rem;
+  }
+  
+  .count-cell {
+    padding: 0.6rem 0.8rem;
+    min-width: 65px;
+  }
+  
+  .count-cell strong {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+  
+  .count-cell span {
+    font-size: 0.65rem;
+  }
+}
+```
+
+### Desktop (≥ 768px)
+
+The default styles provide optimal desktop appearance with larger numbers and more spacing.
+
+## Implementation Guide
+
+<Steps>
+  <Step title="Set Festival Date">
+    Update the `FESTIVAL_DATE` in the `CONFIG` object:
+    
+    ```javascript
+    const CONFIG = {
+      FESTIVAL_DATE: new Date("2025-11-18T10:00:00")
+      // Format: YYYY-MM-DDTHH:mm:ss
+    };
+    ```
+    
+    The countdown automatically uses this date.
+  </Step>
+  
+  <Step title="Add HTML Structure">
+    Include the countdown HTML in your hero section:
+    
+    ```html
+    <div class="countdown" aria-label="Cuenta regresiva al festival">
+      <div class="count-cell">
+        <strong id="days">00</strong>
+        <span>Días</span>
+      </div>
+      <span class="count-separator">:</span>
+      <!-- Repeat for hours, minutes, seconds -->
+    </div>
+    ```
+  </Step>
+  
+  <Step title="Initialize on Load">
+    The countdown auto-initializes:
+    
+    ```javascript
+    document.addEventListener("DOMContentLoaded", () => {
+      initCountdown();
+    });
+    ```
+  </Step>
+  
+  <Step title="Customize Styling">
+    Modify CSS variables for brand consistency:
+    
+    ```css
+    .count-cell {
+      background: rgba(YOUR_COLOR);
+      border-color: rgba(YOUR_COLOR);
+    }
+    
+    .count-separator {
+      color: #YOUR_ACCENT_COLOR;
+    }
+    ```
+  </Step>
+</Steps>
+
+## Advanced Customization
+
+### Add Animation on Update
+
+```javascript
+function updateCounter() {
+  const now = Date.now();
+  const diff = Math.max(0, CONFIG.FESTIVAL_DATE.getTime() - now);
+  
+  const s = Math.floor((diff / 1000) % 60);
+  const prevSeconds = secondsEl.textContent;
+  
+  secondsEl.textContent = String(s).padStart(2, "0");
+  
+  // Pulse animation on second change
+  if (prevSeconds !== secondsEl.textContent) {
+    secondsEl.style.transform = 'scale(1.1)';
+    setTimeout(() => {
+      secondsEl.style.transform = 'scale(1)';
+    }, 100);
+  }
+}
+```
+
+### Custom Labels
+
+Change the label text for different languages:
+
+```html
+<div class="count-cell">
+  <strong id="days">00</strong>
+  <span>Days</span> <!-- English -->
+</div>
+```
+
+### Display Weeks
+
+Modify calculation to show weeks instead of days:
+
+```javascript
+const weeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
+const remainingDays = Math.floor((diff / (1000 * 60 * 60 * 24)) % 7);
+
+weeksEl.textContent = String(weeks).padStart(2, "0");
+daysEl.textContent = String(remainingDays).padStart(2, "0");
+```
+
+## Accessibility
+
+- `aria-label` provides context for screen readers
+- Large, high-contrast numbers for visibility
+- Semantic HTML structure
+- No flashing animations (only gentle fades)
+
+## Performance
+
+**Interval Efficiency:**
+- Updates only once per second (not every frame)
+- Uses `Date.now()` for accurate time calculation
+- Clears interval when countdown completes
+
+**Browser Optimization:**
+- Modern browsers optimize `setInterval` when tab is inactive
+- Minimal DOM manipulation (only 4 text updates per second)
+
+## Troubleshooting
+
+**Countdown shows "00:00:00:00" immediately:**
+- Check that `FESTIVAL_DATE` is in the future
+- Verify date format: `new Date("YYYY-MM-DDTHH:mm:ss")`
+
+**Numbers don't update:**
+- Ensure HTML elements have correct IDs: `#days`, `#hours`, `#minutes`, `#seconds`
+- Check that `initCountdown()` is called after DOM loads
+
+**Wrong timezone:**
+- `new Date()` uses local timezone by default
+- For specific timezone, use libraries like `date-fns-tz` or convert manually

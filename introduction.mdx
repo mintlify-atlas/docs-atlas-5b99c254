@@ -1,0 +1,165 @@
+---
+title: Introduction
+description: Welcome to Mikunki Shapshico - A vibrant festival website celebrating Huánuco's gastronomy and culture with live streaming and interactive features.
+---
+
+# Welcome to Mikunki Shapshico
+
+Mikunki Shapshico is a modern festival website celebrating 12 years of gastronomic and cultural tradition from UNHEVAL in Huánuco, Peru. This frontend project features a stunning single-page design with live streaming capabilities, interactive chat, countdown timers, and immersive visual effects.
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Get the festival site running locally in under 2 minutes
+  </Card>
+  
+  <Card title="Installation Guide" icon="gear" href="/installation">
+    Detailed setup instructions and configuration options
+  </Card>
+  
+  <Card title="Live Features" icon="tower-broadcast">
+    Real-time streaming with Vimeo integration and interactive chat system
+  </Card>
+  
+  <Card title="Visual Effects" icon="wand-magic-sparkles">
+    Particle animations, parallax scrolling, and fire video overlays
+  </Card>
+</CardGroup>
+
+## What Makes This Special
+
+The Mikunki Shapshico website is built with vanilla HTML, CSS, and JavaScript - no frameworks required. It showcases modern web development techniques while maintaining exceptional performance.
+
+### Key Features
+
+<AccordionGroup>
+  <Accordion title="Live Streaming Integration">
+    - Vimeo player integration with waiting screen
+    - Live indicator badges with pulse animations
+    - Player controls with collapsible information panel
+    - Share functionality with native Web Share API
+  </Accordion>
+
+  <Accordion title="Interactive Chat System">
+    - Twitch-style chat interface with user authentication
+    - Point-based economy system for engagement
+    - Superchat tiers (Bronze, Silver, Gold) with custom styling
+    - Real-time message simulation with moderator badges
+    - Quick emoji reactions
+  </Accordion>
+
+  <Accordion title="Visual Effects & Animations">
+    - Floating particle system with 25 animated particles
+    - Parallax scrolling fire video overlay
+    - Typewriter effect for hero subtitle
+    - Reveal animations using Intersection Observer
+    - Grain texture overlay for authentic feel
+  </Accordion>
+
+  <Accordion title="Festival Program Timeline">
+    - Visual timeline with color-coded events
+    - Four main program sections (Inauguration, Contest, Dance, Awards)
+    - Hover effects with dot animations
+    - Responsive event cards
+  </Accordion>
+</AccordionGroup>
+
+## Technology Stack
+
+<CardGroup cols={3}>
+  <Card title="HTML5" icon="code">
+    Semantic markup with accessibility features (ARIA labels, skip links)
+  </Card>
+  
+  <Card title="CSS3" icon="paintbrush">
+    Custom properties, gradients, animations, and grid/flexbox layouts
+  </Card>
+  
+  <Card title="JavaScript ES6+" icon="js">
+    Modern vanilla JS with Intersection Observer, localStorage, and async/await
+  </Card>
+</CardGroup>
+
+### External Resources
+
+- **Fonts**: Google Fonts (Bebas Neue, Poppins)
+- **Icons**: Font Awesome 6.5.1
+- **Images/Videos**: Cloudinary CDN
+- **Live Video**: Vimeo player embed
+
+## Project Structure
+
+```
+source/
+├── index.html      # Main HTML file with complete site structure
+├── script.js       # All JavaScript functionality (1,100+ lines)
+├── styles.css      # Complete styling (2,200+ lines)
+└── README.md       # Project documentation
+```
+
+<Note>
+  The entire site is contained in just three files, making it incredibly easy to deploy and maintain!
+</Note>
+
+## Core Components
+
+### Navigation
+- Fixed header with blur backdrop
+- Mobile hamburger menu with smooth transitions
+- Active section highlighting based on scroll position
+- Accessibility-compliant with ARIA attributes
+
+### Hero Section
+- Full viewport height with centered content
+- Animated logo with pulse effect
+- Real-time countdown to festival date (Nov 18, 2025)
+- Call-to-action buttons with hover effects
+- Fire video background with blend modes
+
+### Live Streaming Section
+- 16:9 aspect ratio player shell
+- Vimeo iframe integration (source/script.js:11)
+- Waiting screen with festival branding
+- Viewer counter with random fluctuation
+- Mobile-responsive layout sync
+
+### Gallery
+- Masonry grid layout
+- Paper frame effect with rotation
+- Lightbox modal for full-size viewing
+- Lazy loading for performance
+
+<Warning>
+  The live stream URL is configured in `script.js` at line 11. Update the `STREAM_URL` constant to point to your Vimeo video.
+</Warning>
+
+## Performance Features
+
+- **Lazy Loading**: Images load only when needed
+- **Preconnect**: DNS prefetching for Google Fonts
+- **RequestAnimationFrame**: Smooth animations without jank
+- **Intersection Observer**: Efficient scroll-based reveals
+- **LocalStorage**: Persistent user preferences and chat sessions
+
+## Browser Support
+
+The site uses modern web APIs and is optimized for:
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+
+<Note>
+  Features like Intersection Observer and CSS Grid are used extensively. Older browsers may require polyfills.
+</Note>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Get Started" icon="play" href="/quickstart">
+    Open the site locally and explore its features
+  </Card>
+  
+  <Card title="Configuration" icon="sliders" href="/installation">
+    Learn how to customize settings and content
+  </Card>
+</CardGroup>

@@ -1,0 +1,533 @@
+---
+title: 'Masonry Gallery'
+description: 'Photo gallery with masonry grid layout, lightbox viewer, and paper frame effects'
+---
+
+# Masonry Gallery
+
+An interactive photo gallery with CSS masonry layout, full-screen lightbox viewer, and vintage paper frame styling.
+
+## Overview
+
+The gallery system includes:
+- **CSS Grid masonry layout** for dynamic photo arrangement
+- **Lightbox modal** with full-screen image viewing
+- **Paper frame effect** with rotated photo styling
+- **Hover overlays** with captions
+- **Keyboard navigation** (Escape to close)
+- **Lazy loading** for performance
+
+## Core Function
+
+### initLightbox()
+
+Initializes the lightbox modal system for full-screen image viewing.
+
+**Location:** `script.js:326`
+
+```javascript
+function initLightbox() {
+  const galleryGrid = $("#galleryGrid");
+  const lightbox = $("#lightbox");
+  const lightboxImg = $("#lightboxImg");
+  const lightboxCaption = $("#lightboxCaption");
+  const lightboxClose = $("#lightboxClose");
+
+  if (!galleryGrid || !lightbox || !lightboxImg) return;
+
+  // Open lightbox on image click
+  galleryGrid.addEventListener("click", (e) => {
+    const shot = e.target.closest(".shot");
+    if (!shot) return;
+    
+    const img = shot.querySelector("img");
+    if (!img) return;
+
+    lightboxImg.src = img.src;
+    lightboxImg.alt = img.alt;
+    
+    const caption = shot.dataset.caption || img.alt;
+    if (lightboxCaption) lightboxCaption.textContent = caption;
+    
+    lightbox.classList.add("open");
+    document.body.style.overflow = "hidden";
+  });
+
+  function closeLightbox() {
+    lightbox.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  // Close button
+  lightboxClose?.addEventListener("click", closeLightbox);
+  
+  // Click outside image
+  lightbox?.addEventListener("click", (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+  
+  // Escape key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeLightbox();
+  });
+}
+```
+
+### Event Delegation
+
+The lightbox uses **event delegation** on the gallery grid:
+
+```javascript
+galleryGrid.addEventListener("click", (e) => {
+  const shot = e.target.closest(".shot");
+  // ...
+});
+```
+
+**Benefits:**
+- Single event listener for all images
+- Works with dynamically added images
+- Better performance than individual listeners
+
+### Caption Handling
+
+```javascript
+const caption = shot.dataset.caption || img.alt;
+```
+
+Priority:
+1. `data-caption` attribute on `.shot` element
+2. Fallback to image `alt` text
+
+### Body Scroll Lock
+
+```javascript
+// Lock scroll when lightbox opens
+lightbox.classList.add("open");
+document.body.style.overflow = "hidden";
+
+// Restore scroll when lightbox closes
+function closeLightbox() {
+  lightbox.classList.remove("open");
+  document.body.style.overflow = "";
+}
+```
+
+## HTML Structure
+
+### Gallery Grid
+
+```html
+<div class="gallery-masonry" id="galleryGrid">
+  <figure class="shot" data-caption="Plato tradicional en exposición">
+    <div class="paper-frame" style="--rotation: -1.5deg;">
+      <img src="image.jpg" alt="Plato tradicional" loading="lazy" />
+    </div>
+    <div class="shot-overlay">
+      <span class="shot-caption">Plato tradicional en exposición</span>
+    </div>
+  </figure>
+  
+  <figure class="shot" data-caption="Equipo de cocina">
+    <div class="paper-frame" style="--rotation: 1.2deg;">
+      <img src="image2.jpg" alt="Equipo de cocina" loading="lazy" />
+    </div>
+    <div class="shot-overlay">
+      <span class="shot-caption">Equipo de cocina del festival</span>
+    </div>
+  </figure>
+  
+  <!-- More images... -->
+</div>
+```
+
+### Lightbox Modal
+
+```html
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Cerrar">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+  <div class="lightbox-content">
+    <img id="lightboxImg" alt="Imagen ampliada del festival" />
+    <p id="lightboxCaption" class="lightbox-caption"></p>
+  </div>
+</div>
+```
+
+## CSS Grid Masonry
+
+### Gallery Layout
+
+```css
+.gallery-masonry {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+/* Masonry effect with varied heights */
+.shot:nth-child(3n + 1) .paper-frame img { min-height: 350px; }
+.shot:nth-child(3n + 2) .paper-frame img { min-height: 280px; }
+.shot:nth-child(3n + 3) .paper-frame img { min-height: 420px; }
+```
+
+**Responsive columns:**
+- Mobile: 1 column (< 600px)
+- Tablet: 2 columns (600px - 900px)
+- Desktop: 3-4 columns (> 900px)
+
+### Paper Frame Effect
+
+```css
+.paper-frame {
+  background: var(--white);
+  padding: 0.9rem;
+  border-radius: 6px;
+  transform: rotate(var(--rotation, -1.2deg));
+  box-shadow: var(--shadow-card);
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  transition: var(--transition-base);
+}
+
+.paper-frame:hover {
+  transform: rotate(0deg) scale(1.02);
+  box-shadow: var(--shadow-elevated);
+}
+
+/* Tape pieces at top */
+.paper-frame::before,
+.paper-frame::after {
+  content: "";
+  position: absolute;
+  width: 68px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  top: -8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.paper-frame::before {
+  left: 18px;
+  transform: rotate(-8deg);
+}
+
+.paper-frame::after {
+  right: 16px;
+  transform: rotate(7deg);
+}
+
+.paper-frame img {
+  border: 10px solid var(--white);
+  filter: contrast(1.03) saturate(1.08) sepia(0.1);
+  min-height: 250px;
+  object-fit: cover;
+}
+```
+
+**Custom rotation per image:**
+```html
+<div class="paper-frame" style="--rotation: -1.5deg;">
+```
+
+Rotation values: `-2deg` to `2deg` for variety
+
+### Shot Overlay
+
+```css
+.shot {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 8px;
+  transition: var(--transition-base);
+}
+
+.shot-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    transparent 50%
+  );
+  display: flex;
+  align-items: flex-end;
+  padding: 1.5rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.shot:hover .shot-overlay {
+  opacity: 1;
+}
+
+.shot-caption {
+  color: var(--white);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+```
+
+## Lightbox Styling
+
+### Modal Container
+
+```css
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.lightbox.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.lightbox-content {
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.lightbox-content img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-caption {
+  color: var(--white);
+  font-size: 1.1rem;
+  text-align: center;
+  max-width: 800px;
+}
+```
+
+### Close Button
+
+```css
+.lightbox-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--white);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  z-index: 10000;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--white);
+  transform: rotate(90deg);
+}
+```
+
+## CSS Variables
+
+```css
+:root {
+  --white: #FFFFFF;
+  --shadow-card: 0 14px 28px rgba(0, 0, 0, 0.28);
+  --shadow-elevated: 0 20px 40px rgba(0, 0, 0, 0.35);
+  --transition-base: 0.3s ease;
+  --transition-fast: 0.2s ease;
+}
+```
+
+## Implementation Guide
+
+<Steps>
+  <Step title="Add Gallery HTML">
+    Create the gallery grid with paper frames:
+    
+    ```html
+    <div class="gallery-masonry" id="galleryGrid">
+      <figure class="shot" data-caption="Your caption">
+        <div class="paper-frame" style="--rotation: -1.5deg;">
+          <img src="photo.jpg" alt="Description" loading="lazy" />
+        </div>
+        <div class="shot-overlay">
+          <span class="shot-caption">Your caption</span>
+        </div>
+      </figure>
+    </div>
+    ```
+  </Step>
+  
+  <Step title="Add Lightbox HTML">
+    Include the lightbox modal before closing `</body>`:
+    
+    ```html
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+      <button class="lightbox-close" id="lightboxClose" aria-label="Cerrar">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="lightbox-content">
+        <img id="lightboxImg" alt="Imagen ampliada" />
+        <p id="lightboxCaption" class="lightbox-caption"></p>
+      </div>
+    </div>
+    ```
+  </Step>
+  
+  <Step title="Initialize Lightbox">
+    The lightbox auto-initializes:
+    
+    ```javascript
+    document.addEventListener("DOMContentLoaded", () => {
+      initLightbox();
+    });
+    ```
+  </Step>
+  
+  <Step title="Vary Rotations">
+    Use different `--rotation` values for each image:
+    - Range: `-2deg` to `2deg`
+    - Example: `-1.5deg`, `1.2deg`, `-0.8deg`, `2deg`, `-1.8deg`
+  </Step>
+  
+  <Step title="Optimize Images">
+    - Use `loading="lazy"` for lazy loading
+    - Recommended size: 700-760px width
+    - Format: WebP for better compression
+    - Alt text: Descriptive for accessibility
+  </Step>
+</Steps>
+
+## Advanced Features
+
+### Add Navigation Arrows
+
+```javascript
+let currentIndex = 0;
+const images = Array.from($$('.shot img'));
+
+function showImage(index) {
+  currentIndex = index;
+  const img = images[index];
+  lightboxImg.src = img.src;
+  lightboxCaption.textContent = img.alt;
+}
+
+function nextImage() {
+  currentIndex = (currentIndex + 1) % images.length;
+  showImage(currentIndex);
+}
+
+function prevImage() {
+  currentIndex = (currentIndex - 1 + images.length) % images.length;
+  showImage(currentIndex);
+}
+
+// Add keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (!lightbox.classList.contains('open')) return;
+  if (e.key === 'ArrowRight') nextImage();
+  if (e.key === 'ArrowLeft') prevImage();
+});
+```
+
+### Dynamic Image Loading
+
+```javascript
+function addGalleryImage(src, alt, caption, rotation) {
+  const figure = document.createElement('figure');
+  figure.className = 'shot';
+  figure.dataset.caption = caption;
+  
+  figure.innerHTML = `
+    <div class="paper-frame" style="--rotation: ${rotation}deg;">
+      <img src="${src}" alt="${alt}" loading="lazy" />
+    </div>
+    <div class="shot-overlay">
+      <span class="shot-caption">${caption}</span>
+    </div>
+  `;
+  
+  galleryGrid.appendChild(figure);
+}
+
+// Example usage
+addGalleryImage(
+  'photo.jpg',
+  'Festival scene',
+  'Dancing performance',
+  -1.2
+);
+```
+
+### Stagger Animations
+
+Reveal images with staggered entrance:
+
+```javascript
+const shots = $$('.shot');
+shots.forEach((shot, i) => {
+  shot.style.opacity = '0';
+  shot.style.transform = 'translateY(20px)';
+  shot.style.transition = `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s`;
+  
+  requestAnimationFrame(() => {
+    shot.style.opacity = '1';
+    shot.style.transform = 'translateY(0)';
+  });
+});
+```
+
+## Accessibility
+
+- `role="dialog"` and `aria-modal="true"` on lightbox
+- `aria-label="Cerrar"` on close button
+- Keyboard navigation (Escape to close)
+- Focus trap within lightbox when open
+- Alt text on all images
+- High contrast overlay text
+
+## Performance Optimization
+
+**Lazy Loading:**
+```html
+<img src="photo.jpg" loading="lazy" />
+```
+
+**Image Filters:**
+```css
+.paper-frame img {
+  filter: contrast(1.03) saturate(1.08) sepia(0.1);
+}
+```
+Applies vintage photo effect via CSS (GPU-accelerated)
+
+**Event Delegation:**
+- Single click listener on gallery grid
+- No individual listeners per image
+
+**Transition Performance:**
+```css
+transition: opacity 0.3s ease, transform 0.3s ease;
+```
+Uses GPU-accelerated properties only

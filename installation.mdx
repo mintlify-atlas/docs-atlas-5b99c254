@@ -1,0 +1,720 @@
+---
+title: Installation & Setup
+description: Detailed installation instructions, file structure breakdown, and complete configuration guide for the Mikunki Shapshico festival website.
+---
+
+# Installation & Setup
+
+This guide covers everything you need to know about setting up, configuring, and customizing the Mikunki Shapshico festival website.
+
+## File Structure
+
+The project is intentionally minimal with just three core files:
+
+```
+source/
+├── index.html      # Complete HTML structure (579 lines)
+├── script.js       # All JavaScript functionality (1,102 lines)
+├── styles.css      # Complete styling (2,200+ lines)
+└── README.md       # Project documentation
+```
+
+<Note>
+  No build process, no dependencies, no node_modules. Just pure HTML, CSS, and JavaScript!
+</Note>
+
+## Detailed File Breakdown
+
+### index.html
+
+The HTML file contains:
+
+<AccordionGroup>
+  <Accordion title="Head Section (lines 4-43)">
+    - Meta tags for SEO and social sharing
+    - Open Graph and Twitter Card metadata
+    - Canonical URL
+    - Font preloading with Google Fonts (Bebas Neue, Poppins)
+    - Font Awesome 6.5.1 from CDN
+    - CSS and JS file references
+  </Accordion>
+
+  <Accordion title="Accessibility Features">
+    - Skip link for keyboard navigation (line 47)
+    - ARIA labels throughout
+    - Semantic HTML5 elements
+    - Screen reader only content with `.sr-only` class
+  </Accordion>
+
+  <Accordion title="Visual Effects Layers">
+    - Grain texture overlay (line 50)
+    - Floating particles container (line 53)
+    - Fire video backgrounds (lines 117, 430, 564)
+  </Accordion>
+
+  <Accordion title="Main Sections">
+    - **Navigation** (lines 56-77): Fixed header with mobile menu
+    - **Hero** (lines 81-119): Landing section with countdown
+    - **Festival Info** (lines 125-163): About section with highlights
+    - **Program** (lines 169-227): Timeline with 4 events
+    - **Live Stream** (lines 233-432): Player and chat
+    - **Gallery** (lines 438-510): Masonry photo grid
+    - **Sponsors** (lines 516-538): Institution logos
+    - **Footer** (lines 545-566): Contact and social links
+    - **Lightbox** (lines 569-575): Full-screen image viewer
+  </Accordion>
+</AccordionGroup>
+
+### script.js
+
+The JavaScript file is organized into modules:
+
+```javascript
+// Configuration (lines 10-15)
+const CONFIG = {
+  STREAM_URL: "https://player.vimeo.com/video/76979871?...",
+  IS_LIVE: true,
+  FESTIVAL_DATE: new Date("2025-11-18T10:00:00"),
+  PARTICLE_COUNT: 25
+};
+```
+
+<Tabs>
+  <Tab title="Core Systems">
+    - **Particles** (lines 28-69): Floating animation system
+    - **Navigation** (lines 75-115): Menu and active states
+    - **Reveal Animations** (lines 121-155): Intersection Observer
+    - **Countdown** (lines 161-200): Real-time timer
+  </Tab>
+
+  <Tab title="Live Features">
+    - **Live Stream** (lines 206-237): Vimeo integration
+    - **Layout Sync** (lines 239-280): Player/chat height matching
+    - **Mobile Toggle** (lines 282-320): Info panel collapse
+  </Tab>
+
+  <Tab title="Interactive Elements">
+    - **Lightbox** (lines 326-365): Gallery viewer
+    - **Chat System** (lines 371-821): Complete Twitch-style chat
+    - **Share Button** (lines 894-1004): Web Share API
+    - **Reminder Buttons** (lines 1010-1028): Confetti effects
+  </Tab>
+
+  <Tab title="Visual Effects">
+    - **Fire Video** (lines 828-831): Playback speed control
+    - **Parallax** (lines 837-861): Scroll-based movement
+    - **Typewriter** (lines 867-888): Animated text effect
+    - **Confetti** (lines 1034-1078): Celebration animation
+  </Tab>
+</Tabs>
+
+### styles.css
+
+The CSS is structured with:
+
+<Steps>
+  <Step title="CSS Variables (lines 6-43)">
+    ```css
+    :root {
+      --red-main: #CC0000;
+      --fire-1: #FF6600;
+      --gold: #FFD700;
+      --max: 1200px;
+      --nav-h: 78px;
+      --heading: "Bebas Neue", sans-serif;
+      --body: "Poppins", sans-serif;
+    }
+    ```
+  </Step>
+
+  <Step title="Reset & Base Styles (lines 46-103)">
+    - Box-sizing reset
+    - Smooth scroll behavior
+    - Font smoothing
+    - Link style resets
+  </Step>
+
+  <Step title="Global Effects (lines 105-148)">
+    - Grain texture overlay with SVG noise filter
+    - Floating particle animations
+    - Diamond divider SVG pattern
+  </Step>
+
+  <Step title="Component Styles">
+    Each major component has dedicated CSS:
+    - Navigation (lines 237-381)
+    - Hero section (lines 383-678)
+    - Timeline (lines 786-892)
+    - Live player & chat (lines 894-1973)
+    - Gallery (lines 437-510)
+  </Step>
+</Steps>
+
+## External Dependencies
+
+### Fonts
+
+**Google Fonts** (preloaded with `display=swap`):
+
+```html source/index.html
+<link rel="preload" 
+  href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;700&display=swap" 
+  as="style" 
+  onload="this.onload=null;this.rel='stylesheet'" />
+```
+
+- **Bebas Neue**: Headings and titles
+- **Poppins**: Body text (weights: 300, 400, 600, 700)
+
+### Icons
+
+**Font Awesome 6.5.1** from Cloudflare CDN:
+
+```html
+<link rel="stylesheet" 
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+```
+
+Used for:
+- Navigation icons
+- Social media links
+- Chat interface elements
+- Event markers in timeline
+
+### Media Assets
+
+All hosted on **Cloudinary CDN**:
+
+<CodeGroup>
+```text Logos
+https://res.cloudinary.com/renatoez/image/upload/v1771435323/icono_ekadg2.svg
+https://res.cloudinary.com/renatoez/image/upload/v1771435258/letras_vbzu8k.svg
+```
+
+```text Fire Videos
+https://res.cloudinary.com/renatoez/video/upload/f_auto,q_auto:low,w_640,vc_auto/v1771442237/13717343_2048_1080_30fps_iqmvyt.mp4
+```
+
+```text Divider Pattern
+https://res.cloudinary.com/renatoez/image/upload/v1771468824/barra_zdffy8.svg
+```
+
+```text Institution Logos
+https://res.cloudinary.com/renatoez/image/upload/v1771435550/unheval_logo_g9zgkv.png
+https://res.cloudinary.com/renatoez/image/upload/v1771435028/COMUNICACIÓN_c5eeie.png
+```
+</CodeGroup>
+
+### Video Embed
+
+**Vimeo Player** for live streaming:
+
+```javascript source/script.js
+STREAM_URL: "https://player.vimeo.com/video/76979871?autoplay=1&muted=1&title=0&byline=0&portrait=0"
+```
+
+## Configuration Guide
+
+### Core Settings
+
+Edit `source/script.js` lines 10-15:
+
+<CodeGroup>
+```javascript Stream URL
+STREAM_URL: "https://player.vimeo.com/video/YOUR_VIDEO_ID?autoplay=1&muted=1&title=0&byline=0&portrait=0"
+```
+
+```javascript Live Status
+IS_LIVE: true,  // false = show waiting screen
+```
+
+```javascript Festival Date
+FESTIVAL_DATE: new Date("2025-11-18T10:00:00"),  // Update for your event
+```
+
+```javascript Particles
+PARTICLE_COUNT: 25  // Lower number = better performance
+```
+</CodeGroup>
+
+### Color Scheme
+
+Customize the color palette in `source/styles.css` lines 6-18:
+
+```css source/styles.css
+:root {
+  --red-main: #CC0000;      /* Primary brand color */
+  --red-deep: #1A0000;      /* Dark backgrounds */
+  --red-bright: #FF3333;    /* Accents */
+  --fire-1: #FF6600;        /* Fire orange */
+  --fire-2: #FF8C00;        /* Fire bright */
+  --gold: #FFD700;          /* Highlights */
+  --gold-dark: #B8860B;     /* Gold accents */
+  --white: #FFFFFF;
+  --black: #000000;
+}
+```
+
+### Typography
+
+Change fonts in CSS variables:
+
+```css
+--heading: "Bebas Neue", sans-serif;  /* Display font */
+--body: "Poppins", sans-serif;        /* Body text */
+```
+
+Don't forget to update the Google Fonts URL in `index.html` line 34!
+
+### Layout
+
+Adjust container and spacing:
+
+```css
+--max: 1200px;         /* Max content width */
+--nav-h: 78px;         /* Header height */
+--radius: 18px;        /* Border radius */
+--radius-sm: 12px;     /* Small radius */
+```
+
+## Content Customization
+
+### Update Festival Info
+
+<Tabs>
+  <Tab title="Hero Section">
+    Edit `index.html` lines 88-98:
+    
+    ```html
+    <p class="hero-sub">Festival Gastronómico y Cultural · UNHEVAL · Huánuco, Perú</p>
+    
+    <div class="hero-badge-row">
+      <span class="ribbon"><i class="fa-solid fa-fire"></i> 12 Años de Tradición</span>
+      <span class="stamp"><i class="fa-solid fa-calendar-day"></i> Vier. 18 Nov.</span>
+    </div>
+    ```
+  </Tab>
+
+  <Tab title="About Section">
+    Edit `index.html` lines 130-134:
+    
+    ```html
+    <p class="section-sub">Es la denominación de la actividad cultural...</p>
+    ```
+    
+    Update the three highlight cards (lines 143-160):
+    - Gastronomía Amazónica
+    - Cultura y Danza
+    - La SHACTA
+  </Tab>
+
+  <Tab title="Program Timeline">
+    Modify event cards in `index.html` lines 178-224:
+    
+    ```html
+    <article class="event-card" data-color="orange">
+      <div class="event-dot"></div>
+      <div class="event-content">
+        <div class="event-top">
+          <span class="time-badge"><i class="fa-regular fa-clock"></i> 11:30</span>
+          <span class="event-icon"><i class="fa-solid fa-bowl-food"></i> Concurso</span>
+        </div>
+        <h3>Concurso Gastronómico</h3>
+        <p>Competencia de platos típicos...</p>
+      </div>
+    </article>
+    ```
+    
+    Available colors: `white`, `orange`, `gold`, `red`
+  </Tab>
+
+  <Tab title="Social Links">
+    Update footer links in `index.html` lines 552-559:
+    
+    ```html
+    <a href="https://www.facebook.com/mikunki.shapshico" target="_blank" rel="noopener" aria-label="Facebook">
+      <i class="fa-brands fa-facebook-f"></i>
+    </a>
+    ```
+  </Tab>
+</Tabs>
+
+### Gallery Images
+
+Replace placeholder images in `index.html` lines 444-507:
+
+```html
+<figure class="shot" data-caption="Plato tradicional en exposición">
+  <div class="paper-frame" style="--rotation: -1.5deg;">
+    <img src="YOUR_IMAGE_URL" alt="Plato tradicional en exposición" loading="lazy" />
+  </div>
+  <div class="shot-overlay">
+    <span class="shot-caption">Plato tradicional en exposición</span>
+  </div>
+</figure>
+```
+
+<Note>
+  Use the `--rotation` CSS variable to adjust paper frame tilt (-2deg to 2deg works best).
+</Note>
+
+## Chat System Configuration
+
+### Moderator Names
+
+Edit moderator list in `source/script.js` line 401:
+
+```javascript
+const MODERATORS = new Set(["UNHEVALista", "FestivalFan", "MikunFan", "Moderador"]);
+```
+
+Moderators get a special badge: <i class="fa-solid fa-shield-halved"></i>
+
+### Superchat Tiers
+
+Modify tier costs in `source/script.js` lines 403-407:
+
+```javascript
+const TIERS = {
+  bronze: { key: "bronze", css: "tier-bronze", icon: "fa-medal", label: "Bronce", amount: 40 },
+  silver: { key: "silver", css: "tier-silver", icon: "fa-gem", label: "Plata", amount: 80 },
+  gold: { key: "gold", css: "tier-gold", icon: "fa-crown", label: "Oro", amount: 120 }
+};
+```
+
+### Simulated Messages
+
+Customize chat simulation data:
+
+<CodeGroup>
+```javascript Usernames (lines 409-415)
+const SIM_NAMES = [
+  "Huanuqueño99", "DanzaViva", "ChefAndino", "ShactaLover",
+  "UNHEVALista", "ComidaPerú", "FiestaTotal", "Pachamanca"
+];
+```
+
+```javascript Messages (lines 421-432)
+const SIM_MSGS = [
+  "¡Qué buena la comida! 🍖", "Vamos Huánuco! 🔥",
+  "La danza está increíble 💃", "¡Arriba UNHEVAL! 🎉"
+];
+```
+
+```javascript Superchats (lines 776-783)
+const SUPERCHAT_MSGS = [
+  { text: "¡Bienvenidos todos al festival!", amount: "120 pts" },
+  { text: "Recuerden usar el hashtag #MikunkiShapshico2025", amount: "90 pts" }
+];
+```
+</CodeGroup>
+
+## Performance Optimization
+
+### Image Optimization
+
+<Steps>
+  <Step title="Use WebP format">
+    Convert images to WebP for 25-35% smaller file sizes:
+    
+    ```html
+    <picture>
+      <source srcset="image.webp" type="image/webp">
+      <img src="image.jpg" alt="Fallback">
+    </picture>
+    ```
+  </Step>
+
+  <Step title="Implement lazy loading">
+    Already implemented in gallery (line 446):
+    
+    ```html
+    <img src="..." loading="lazy" />
+    ```
+  </Step>
+
+  <Step title="Optimize video files">
+    Fire videos are already optimized via Cloudinary:
+    - Auto format selection (`f_auto`)
+    - Quality optimization (`q_auto:low`)
+    - Width limiting (`w_640` or `w_720`)
+    - Video codec optimization (`vc_auto`)
+  </Step>
+</Steps>
+
+### Reduce Motion
+
+The site respects `prefers-reduced-motion`:
+
+```javascript source/script.js
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  return;  // Skip particle animations
+}
+```
+
+To disable all animations, add to CSS:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+### Mobile Optimization
+
+Particle count auto-reduces on mobile (line 39):
+
+```javascript
+const isMobile = window.matchMedia('(pointer: coarse)').matches;
+const count = isMobile ? 10 : CONFIG.PARTICLE_COUNT;
+```
+
+## Deployment
+
+### Static Hosting
+
+The site is ready to deploy to any static host:
+
+<CardGroup cols={2}>
+  <Card title="Netlify" icon="n">
+    ```bash
+    # Drag and drop source/ folder
+    # or use Netlify CLI:
+    netlify deploy --dir=source --prod
+    ```
+  </Card>
+
+  <Card title="Vercel" icon="triangle">
+    ```bash
+    # Drag and drop source/ folder
+    # or use Vercel CLI:
+    vercel --prod
+    ```
+  </Card>
+
+  <Card title="GitHub Pages" icon="github">
+    ```bash
+    # Push source/ contents to gh-pages branch
+    git subtree push --prefix source origin gh-pages
+    ```
+  </Card>
+
+  <Card title="Cloudflare Pages" icon="cloud">
+    ```bash
+    # Connect your repo and set:
+    # Build command: (none)
+    # Build output directory: source
+    ```
+  </Card>
+</CardGroup>
+
+### Custom Domain
+
+Update canonical URL in `index.html` line 12:
+
+```html
+<link rel="canonical" href="https://yourdomain.com" />
+```
+
+Also update Open Graph and Twitter Card URLs (lines 16, 24).
+
+### SEO Optimization
+
+<AccordionGroup>
+  <Accordion title="Meta Description">
+    Edit line 8-9:
+    ```html
+    <meta name="description" content="Mikunki Shapshico: festival gastronómico y cultural de Huánuco..." />
+    ```
+  </Accordion>
+
+  <Accordion title="Open Graph Image">
+    Update line 19:
+    ```html
+    <meta property="og:image" content="https://yourcdn.com/festival-preview.jpg" />
+    ```
+    
+    Recommended size: 1200x630px
+  </Accordion>
+
+  <Accordion title="Structured Data">
+    Add Event schema to `index.html` before `</head>`:
+    
+    ```html
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      "name": "Mikunki Shapshico 2025",
+      "startDate": "2025-11-18T10:00:00-05:00",
+      "location": {
+        "@type": "Place",
+        "name": "UNHEVAL",
+        "address": "Huánuco, Peru"
+      }
+    }
+    </script>
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Browser Testing
+
+### Recommended Tools
+
+- **Chrome DevTools**: Performance profiling
+- **Firefox Developer Tools**: Grid/Flexbox inspector
+- **Safari Web Inspector**: iOS testing
+- **BrowserStack**: Cross-browser testing
+
+### Known Issues
+
+<Warning>
+  Safari on iOS may require user interaction before video autoplay works, even when muted.
+</Warning>
+
+<Note>
+  Internet Explorer is not supported due to use of modern JavaScript features (arrow functions, const/let, template literals).
+</Note>
+
+## Maintenance
+
+### Update Dependencies
+
+Periodically check for updates:
+
+- Font Awesome: Currently 6.5.1
+- Google Fonts: Auto-updated by Google
+- Cloudinary CDN: Verify URLs are still active
+
+### Backup Strategy
+
+Since there's no database, backup is simple:
+
+```bash
+# Git version control
+git add source/
+git commit -m "Update festival content"
+git push
+
+# Or manual backup
+tar -czf mikunki-backup-$(date +%Y%m%d).tar.gz source/
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Countdown shows 00:00:00">
+    Check that `FESTIVAL_DATE` is in the future:
+    
+    ```javascript
+    FESTIVAL_DATE: new Date("2025-11-18T10:00:00"),
+    ```
+    
+    Ensure the timezone matches your server's timezone.
+  </Accordion>
+
+  <Accordion title="Chat points not accumulating">
+    Points are awarded every 30 seconds (line 815):
+    
+    ```javascript
+    setInterval(() => {
+      if (!currentUser || document.hidden) return;
+      currentUser.points = Math.min(9999, (currentUser.points || 0) + 2);
+    }, 30000);
+    ```
+    
+    Make sure the tab is active (not hidden).
+  </Accordion>
+
+  <Accordion title="Player and chat heights don't match">
+    The layout sync function runs on resize (lines 239-280). Try:
+    - Hard refresh (Ctrl+Shift+R)
+    - Resize browser window to trigger sync
+    - Check console for JavaScript errors
+  </Accordion>
+
+  <Accordion title="Animations are janky">
+    Performance optimizations to try:
+    - Reduce `PARTICLE_COUNT` to 10-15
+    - Disable parallax effect (comment out lines 837-861)
+    - Use `will-change` CSS property sparingly
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Customization
+
+### Add Analytics
+
+Insert before `</head>` in `index.html`:
+
+```html
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+```
+
+### Add More Sections
+
+Follow this pattern:
+
+<Steps>
+  <Step title="Add HTML section">
+    ```html
+    <section class="section dark-section" id="sponsors">
+      <div class="container reveal">
+        <h2 class="section-title">Sponsors</h2>
+        <p class="section-sub">Description...</p>
+        <!-- Content -->
+      </div>
+    </section>
+    ```
+  </Step>
+
+  <Step title="Add navigation link">
+    ```html
+    <div class="nav-links" id="navLinks">
+      <a href="#sponsors">Sponsors</a>
+    </div>
+    ```
+  </Step>
+
+  <Step title="Add diamond divider">
+    ```html
+    <div class="diamond-divider" aria-hidden="true"></div>
+    ```
+  </Step>
+</Steps>
+
+### Custom Animations
+
+Create your own animations in CSS:
+
+```css
+@keyframes customSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.my-element {
+  animation: customSlide 0.6s ease;
+}
+```
+
+<Check>
+  You now have complete knowledge of the Mikunki Shapshico codebase! Ready to customize and deploy your festival website.
+</Check>

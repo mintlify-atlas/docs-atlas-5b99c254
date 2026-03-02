@@ -1,0 +1,361 @@
+---
+title: Content configuration
+description: Update text, images, and event information across your festival website
+---
+
+## Overview
+
+The Mikunki Shapshico website stores all content directly in `index.html`. This guide shows you how to update each section of the site with your festival's information.
+
+## Hero Section
+
+The hero section is the first thing visitors see. Update the main branding and call-to-action:
+
+<Steps>
+  <Step title="Update festival name">
+    ```html index.html (lines 58-62)
+    <a class="brand" href="#hero">
+      <img class="brand-logo" src="YOUR_LOGO_URL" alt="Your Festival Icon" />
+      <img class="brand-wordmark" src="YOUR_WORDMARK_URL" alt="Your Festival Name" />
+    </a>
+    ```
+  </Step>
+  
+  <Step title="Update subtitle and location">
+    ```html index.html (line 88)
+    <p class="hero-sub">Your Festival Type · Your Organization · Your Location</p>
+    ```
+  </Step>
+  
+  <Step title="Update badges">
+    ```html index.html (lines 90-93)
+    <div class="hero-badge-row">
+      <span class="ribbon"><i class="fa-solid fa-fire"></i> 12 Years of Tradition</span>
+      <span class="stamp"><i class="fa-solid fa-calendar-day"></i> Fri. Nov 18</span>
+    </div>
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  The hero section includes a background fire video hosted on Cloudinary (line 117-118). You can replace this with your own video or remove it by deleting the `<video>` element.
+</Note>
+
+## Festival Description
+
+Update the "What is Mikunki Shapshico?" section with your festival's story:
+
+```html index.html (lines 127-162)
+<section class="section red-section" id="festival">
+  <div class="container reveal">
+    <h2 class="section-title">What is Your Festival?</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p class="section-sub">Your festival description - first paragraph</p>
+        <p class="section-sub">Your festival description - second paragraph</p>
+      </div>
+      <figure class="paper-frame">
+        <img src="YOUR_FESTIVAL_IMAGE_URL" 
+             alt="Festival description" 
+             loading="lazy" />
+      </figure>
+    </div>
+    
+    <!-- Feature highlights -->
+    <div class="highlights">
+      <article class="highlight">
+        <span class="icon"><i class="fa-solid fa-utensils"></i></span>
+        <div>
+          <strong>Feature 1 Title</strong>
+          <p>Feature 1 description</p>
+        </div>
+      </article>
+      <!-- Add more highlights -->
+    </div>
+  </div>
+</section>
+```
+
+### Available Icons
+
+The site uses Font Awesome 6.5.1. Here are some festival-relevant icons:
+
+<Accordion title="Food & Drink Icons">
+  - `fa-utensils` - Utensils
+  - `fa-bowl-food` - Food bowl
+  - `fa-wine-bottle` - Bottle
+  - `fa-champagne-glasses` - Glasses
+  - `fa-cake-candles` - Cake
+  - `fa-burger` - Burger
+  - `fa-pizza-slice` - Pizza
+</Accordion>
+
+<Accordion title="Entertainment Icons">
+  - `fa-masks-theater` - Theater masks
+  - `fa-music` - Music
+  - `fa-guitar` - Guitar
+  - `fa-microphone` - Microphone
+  - `fa-drum` - Drum
+  - `fa-compact-disc` - Disc
+</Accordion>
+
+<Accordion title="Festival Icons">
+  - `fa-fire` - Fire
+  - `fa-star` - Star
+  - `fa-trophy` - Trophy
+  - `fa-award` - Award
+  - `fa-crown` - Crown
+  - `fa-heart` - Heart
+  - `fa-flag` - Flag
+</Accordion>
+
+## Event Program
+
+Update the event timeline with your schedule:
+
+```html index.html (lines 178-224)
+<article class="event-card" data-color="white">
+  <div class="event-dot"></div>
+  <div class="event-content">
+    <div class="event-top">
+      <span class="time-badge">
+        <i class="fa-regular fa-clock"></i> 10:00
+      </span>
+      <span class="event-icon">
+        <i class="fa-solid fa-microphone"></i> Opening
+      </span>
+    </div>
+    <h3>Event Title</h3>
+    <p>Event description goes here.</p>
+  </div>
+</article>
+```
+
+### Event Color Codes
+
+The `data-color` attribute controls the dot color:
+
+<Tabs>
+  <Tab title="Available Colors">
+    - `data-color="white"` - White dot
+    - `data-color="orange"` - Orange/fire color
+    - `data-color="gold"` - Gold color
+    - `data-color="red"` - Red color
+  </Tab>
+  
+  <Tab title="Custom Colors">
+    Add new colors in `styles.css`:
+    
+    ```css styles.css
+    .event-card[data-color="purple"] .event-dot {
+      background: linear-gradient(135deg, #8B008B, #DA70D6);
+      box-shadow: 0 0 20px rgba(139, 0, 139, 0.5);
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Live Stream Section
+
+The live stream section includes player controls and upcoming events:
+
+### Upcoming Events Cards
+
+```html index.html (lines 411-427)
+<div class="upcoming-grid">
+  <article class="up-card">
+    <div>
+      <strong>11:30</strong>
+      <p>Event Name</p>
+    </div>
+    <button type="button">
+      <i class="fa-regular fa-bell"></i> Remind
+    </button>
+  </article>
+  <!-- Add more events -->
+</div>
+```
+
+<Note>
+  The live stream configuration (URL, status) is set in `script.js`. See the [Live Streaming](/features/live-streaming) feature guide for details.
+</Note>
+
+## Gallery
+
+Update gallery images with your festival photos:
+
+```html index.html (lines 444-508)
+<div class="gallery-masonry" id="galleryGrid">
+  <figure class="shot" data-caption="Your photo caption">
+    <div class="paper-frame" style="--rotation: -1.5deg;">
+      <img src="YOUR_IMAGE_URL" 
+           alt="Photo description" 
+           loading="lazy" />
+    </div>
+    <div class="shot-overlay">
+      <span class="shot-caption">Your photo caption</span>
+    </div>
+  </figure>
+  <!-- Add more photos -->
+</div>
+```
+
+### Photo Frame Rotation
+
+Each frame can have a slight rotation for a scrapbook effect:
+
+```html
+style="--rotation: -1.5deg;"  <!-- Rotate left -->
+style="--rotation: 1.2deg;"   <!-- Rotate right -->
+style="--rotation: 0deg;"     <!-- No rotation -->
+```
+
+<Tip>
+  Use rotation values between -2deg and 2deg for a natural, subtle effect.
+</Tip>
+
+## Sponsors and Institutions
+
+Update sponsor logos and information:
+
+```html index.html (lines 516-538)
+<section class="section red-section sponsors" id="auspicio">
+  <div class="container reveal">
+    <h2 class="section-title">Sponsors</h2>
+    <div class="sponsor-box">
+      <article class="sponsor-card">
+        <div>
+          <img class="sponsor-logo" 
+               src="SPONSOR_LOGO_URL" 
+               alt="Sponsor name" />
+          <p>Sponsor Name or Description</p>
+        </div>
+      </article>
+      <!-- Add more sponsors -->
+    </div>
+  </div>
+</section>
+```
+
+## Footer
+
+Update contact information and social links:
+
+<Steps>
+  <Step title="Update footer text">
+    ```html index.html (lines 549-562)
+    <h2 class="footer-title">Your Festival Name</h2>
+    <p class="footer-tagline">Your festival tagline</p>
+    <p class="footer-info">Organized by Your Organization · Location</p>
+    <p class="copyright">© 2025 Your Festival · All rights reserved</p>
+    ```
+  </Step>
+  
+  <Step title="Update social links">
+    ```html index.html (lines 551-560)
+    <div class="socials">
+      <a href="YOUR_FACEBOOK_URL" target="_blank" rel="noopener" aria-label="Facebook">
+        <i class="fa-brands fa-facebook-f"></i>
+      </a>
+      <a href="YOUR_INSTAGRAM_URL" target="_blank" rel="noopener" aria-label="Instagram">
+        <i class="fa-brands fa-instagram"></i>
+      </a>
+      <a href="YOUR_YOUTUBE_URL" target="_blank" rel="noopener" aria-label="YouTube">
+        <i class="fa-brands fa-youtube"></i>
+      </a>
+      <a href="YOUR_TIKTOK_URL" target="_blank" rel="noopener" aria-label="TikTok">
+        <i class="fa-brands fa-tiktok"></i>
+      </a>
+    </div>
+    ```
+  </Step>
+</Steps>
+
+### Available Social Icons
+
+<Accordion title="Social Media Platforms">
+  Font Awesome brand icons:
+  - `fa-facebook-f` - Facebook
+  - `fa-instagram` - Instagram
+  - `fa-youtube` - YouTube
+  - `fa-tiktok` - TikTok
+  - `fa-twitter` / `fa-x-twitter` - Twitter/X
+  - `fa-linkedin` - LinkedIn
+  - `fa-whatsapp` - WhatsApp
+  - `fa-telegram` - Telegram
+  - `fa-discord` - Discord
+  - `fa-spotify` - Spotify
+</Accordion>
+
+## Navigation Menu
+
+Update the main navigation links:
+
+```html index.html (lines 67-75)
+<div class="nav-links" id="navLinks">
+  <a href="#hero">Home</a>
+  <a href="#festival">The Festival</a>
+  <a href="#programa">Program</a>
+  <a href="#vivo">Live Stream</a>
+  <a href="#galeria">Gallery</a>
+  <a href="#contacto">Contact</a>
+  <a href="#vivo" class="live-cta">
+    <i class="fa-solid fa-tower-broadcast"></i> LIVE
+  </a>
+</div>
+```
+
+<Warning>
+  **Anchor Links**: The `href` values must match the `id` attributes of your sections. For example, `href="#festival"` links to `<section id="festival">`.
+</Warning>
+
+## Bulk Content Updates
+
+### Find and Replace
+
+For site-wide changes, use your text editor's find and replace:
+
+<Tabs>
+  <Tab title="Organization Name">
+    **Find**: `UNHEVAL`  
+    **Replace**: `Your Organization`
+  </Tab>
+  
+  <Tab title="Location">
+    **Find**: `Huánuco, Perú`  
+    **Replace**: `Your City, Country`
+  </Tab>
+  
+  <Tab title="Festival Name">
+    **Find**: `Mikunki Shapshico`  
+    **Replace**: `Your Festival Name`
+  </Tab>
+</Tabs>
+
+### Image URLs
+
+If migrating from Cloudinary:
+
+**Find**: `https://res.cloudinary.com/renatoez/`  
+**Replace**: `https://your-cdn.com/` or `/images/`
+
+## Content Checklist
+
+Before launching, ensure you've updated:
+
+- [ ] Festival name and logo (hero section)
+- [ ] Subtitle and location
+- [ ] Festival description and story
+- [ ] Event timeline (all events, times, descriptions)
+- [ ] Gallery photos (at least 6-8 images)
+- [ ] Sponsor logos and names
+- [ ] Social media links
+- [ ] Footer information
+- [ ] Meta tags (title, description, Open Graph)
+- [ ] Navigation menu items
+- [ ] Live stream URL (in `script.js`)
+- [ ] Festival date (in `script.js`)
+
+<Tip>
+  **Testing**: After making content changes, test all links and ensure images load correctly. Use browser DevTools to check for any 404 errors.
+</Tip>

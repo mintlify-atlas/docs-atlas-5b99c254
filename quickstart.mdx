@@ -1,80 +1,255 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get the Mikunki Shapshico festival website running locally in under 2 minutes.
 ---
 
-## Get started in three steps
+# Quick Start Guide
 
-Get your documentation site running locally and make your first customization.
+Get the Mikunki Shapshico festival site up and running on your local machine in just a few steps. This is a static HTML site with no build process required!
 
-### Step 1: Set up your local environment
+## Prerequisites
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+You only need:
+- A modern web browser (Chrome, Firefox, Safari, or Edge)
+- A local web server (optional but recommended)
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  While you can open `index.html` directly in a browser, using a local server prevents CORS issues with external resources.
 </Note>
+
+## Running the Site
+
+<Steps>
+  <Step title="Navigate to the source directory">
+    Open your terminal and navigate to the project folder:
+    
+    ```bash
+    cd ~/workspace/source
+    ```
+  </Step>
+
+  <Step title="Start a local web server">
+    Choose one of these methods based on what you have installed:
+
+    <CodeGroup>
+      ```bash Python 3
+      python3 -m http.server 8000
+      ```
+
+      ```bash Python 2
+      python -m SimpleHTTPServer 8000
+      ```
+
+      ```bash Node.js (npx)
+      npx serve .
+      ```
+
+      ```bash PHP
+      php -S localhost:8000
+      ```
+    </CodeGroup>
+
+    <Note>
+      If you don't have any of these installed, you can also open `index.html` directly by double-clicking it.
+    </Note>
+  </Step>
+
+  <Step title="Open in your browser">
+    Navigate to the local server URL:
+    
+    ```
+    http://localhost:8000
+    ```
+
+    You should see the Mikunki Shapshico festival homepage with:
+    - Animated hero section with countdown timer
+    - Floating particle effects
+    - Festival program timeline
+    - Live streaming section (waiting screen if not live)
+    - Interactive chat interface
+    - Photo gallery
+  </Step>
+</Steps>
+
+## What You'll See
+
+### Hero Section
+The landing section features:
+- Festival logo and wordmark
+- Animated subtitle with typewriter effect (source/script.js:867-888)
+- Real-time countdown to November 18, 2025 (source/script.js:161-200)
+- CTA buttons linking to festival info and live stream
+- Fire video overlay with parallax scrolling
+
+### Navigation
+- Fixed header that follows you as you scroll
+- Mobile-responsive hamburger menu
+- Smooth scroll to sections
+- Active link highlighting based on visible section
+
+### Live Streaming Area
+<Warning>
+  The stream shows a waiting screen by default. To test with a live video, update the configuration (see below).
+</Warning>
+
+The live section includes:
+- 16:9 video player with Vimeo integration
+- Channel information panel
+- Share button for social sharing
+- Real-time viewer counter
+- Interactive chat system
+
+### Chat System
+Click "Iniciar sesión" to create a test account:
+1. Enter a username
+2. Pick a color
+3. Start chatting!
+
+Chat features:
+- Point-based economy (earn 2 points every 30 seconds)
+- Superchat tiers: Bronze (40pts), Silver (80pts), Gold (120pts)
+- Quick emoji reactions
+- Persistent sessions via localStorage
+
+## Testing the Live Stream
+
+To test with an actual video:
+
+<Steps>
+  <Step title="Open script.js">
+    Edit the configuration at the top of `source/script.js`:
+    
+    ```javascript source/script.js
+    const CONFIG = {
+      STREAM_URL: "https://player.vimeo.com/video/76979871?autoplay=1&muted=1&title=0&byline=0&portrait=0",
+      IS_LIVE: true,
+      FESTIVAL_DATE: new Date("2025-11-18T10:00:00"),
+      PARTICLE_COUNT: 25
+    };
+    ```
+  </Step>
+
+  <Step title="Update the Vimeo URL">
+    Replace the video ID (76979871) with your own Vimeo video:
+    
+    ```javascript
+    STREAM_URL: "https://player.vimeo.com/video/YOUR_VIDEO_ID?autoplay=1&muted=1&title=0&byline=0&portrait=0"
+    ```
+  </Step>
+
+  <Step title="Refresh the page">
+    Reload your browser to see the video player instead of the waiting screen.
+  </Step>
+</Steps>
+
+## Quick Configuration
+
+### Change Festival Date
+
+Update the countdown timer date in `source/script.js:13`:
+
+```javascript
+FESTIVAL_DATE: new Date("2025-11-18T10:00:00"),  // Change this date
+```
+
+### Adjust Particle Count
+
+For better performance on lower-end devices:
+
+```javascript
+PARTICLE_COUNT: 25  // Reduce to 10-15 for slower devices
+```
+
+<Note>
+  The script automatically reduces particles to 10 on mobile devices (source/script.js:39).
+</Note>
+
+### Toggle Live Status
+
+Control whether the stream shows or displays waiting screen:
+
+```javascript
+IS_LIVE: true,  // Set to false to show waiting screen
+```
+
+## Exploring Features
+
+### Try the Chat
+1. Scroll to the "Transmisión EN VIVO" section
+2. Click "Iniciar sesión" in the chat panel
+3. Create a username and pick a color
+4. Send messages and watch points accumulate
+5. Try a superchat when you have 40+ points
+
+### View the Gallery
+- Scroll to the "Galería" section
+- Click any photo to open the lightbox
+- Click outside or press ESC to close
+
+### Test Responsiveness
+- Resize your browser window
+- Try the mobile menu (appears below 768px)
+- Notice how the chat and player stack vertically on mobile
+
+## Performance Tips
+
+<Card title="Reduce Motion for Accessibility" icon="universal-access">
+  If you have `prefers-reduced-motion` enabled in your OS, particle animations automatically disable (source/script.js:33-35).
+</Card>
+
+### Monitor Performance
+
+Open browser DevTools to check:
+- **Network tab**: All resources load from CDN (Cloudinary, Google Fonts)
+- **Performance tab**: Smooth 60fps animations
+- **Console**: Success message on load (source/script.js:1100)
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Fire video not playing">
+    The fire video overlay uses autoplay with mute. Some browsers block autoplay:
+    - Ensure audio is muted (it is by default)
+    - Try a different browser
+    - Check the Cloudinary URL is accessible
+    
+    Video playback rate is set to 0.3x for a slow burn effect (source/script.js:829).
+  </Accordion>
+
+  <Accordion title="Fonts not loading">
+    The site uses Google Fonts (Bebas Neue and Poppins):
+    - Check your internet connection
+    - Look for preconnect warnings in DevTools
+    - Fonts are preloaded with `display=swap` for better UX
+  </Accordion>
+
+  <Accordion title="Icons not showing">
+    Font Awesome 6.5.1 is loaded from CDN:
+    - Verify CDN is accessible: `cdnjs.cloudflare.com`
+    - Check browser console for 404 errors
+    - Icons are referenced with classes like `fa-solid fa-fire`
+  </Accordion>
+
+  <Accordion title="Chat not persisting">
+    Chat uses localStorage for session persistence:
+    - Check if localStorage is enabled in your browser
+    - Try logging out and back in
+    - Clear localStorage: `localStorage.removeItem('mikunki_chat_user')`
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Detailed Installation" icon="book" href="/installation">
+    Learn about file structure, dependencies, and advanced configuration
+  </Card>
+  
+  <Card title="Customization" icon="palette">
+    Modify colors, content, and visual effects to match your brand
+  </Card>
+</CardGroup>
+
+<Check>
+  You're now running the complete Mikunki Shapshico festival website locally! Explore the code to see how each feature works.
+</Check>

@@ -1,0 +1,385 @@
+---
+title: 'Live Streaming'
+description: 'Vimeo live stream integration with waiting screen and responsive player'
+---
+
+# Live Streaming
+
+The live streaming feature provides a professional-grade video player with Vimeo integration, waiting screen, and responsive layout synchronization.
+
+## Overview
+
+The system includes:
+- **Vimeo iframe player** with auto-configuration
+- **Waiting screen** when stream is offline
+- **Live indicator** badges and visual effects
+- **Height synchronization** between player and chat
+- **Collapsible stream info** panel for mobile
+
+## Configuration
+
+Stream settings are defined in the `CONFIG` object:
+
+<ParamField path="STREAM_URL" type="string" required>
+  The Vimeo player URL with query parameters. Example:
+  ```javascript
+  "https://player.vimeo.com/video/76979871?autoplay=1&muted=1&title=0&byline=0&portrait=0"
+  ```
+  Set query params: `autoplay=1`, `muted=1`, `title=0`, `byline=0`, `portrait=0`
+</ParamField>
+
+<ParamField path="IS_LIVE" type="boolean" default="true">
+  Controls whether the stream is live. When `false`, shows waiting screen.
+  
+  ```javascript
+  IS_LIVE: true  // Shows iframe player
+  IS_LIVE: false // Shows waiting screen
+  ```
+</ParamField>
+
+<ParamField path="FESTIVAL_DATE" type="Date" required>
+  The scheduled date for the festival. Displayed on the waiting screen.
+  
+  ```javascript
+  FESTIVAL_DATE: new Date("2025-11-18T10:00:00")
+  ```
+</ParamField>
+
+## Core Functions
+
+### initLiveStream()
+
+Initializes the live stream player and manages the waiting screen state.
+
+**Location:** `script.js:206`
+
+```javascript
+function initLiveStream() {
+  const liveFrame = $("#liveFrame");
+  const waitingScreen = $("#waitingScreen");
+  const waitingDate = $("#waitingDate");
+  const playerLivePill = $(".player-live-pill");
+
+  // Format and display festival date
+  if (waitingDate) {
+    waitingDate.textContent = `Fecha del evento: ${CONFIG.FESTIVAL_DATE.toLocaleDateString("es-PE", {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    })}`;
+  }
+
+  // Check if stream should be live
+  const liveUrl = CONFIG.IS_LIVE && CONFIG.STREAM_URL.trim()
+    ? CONFIG.STREAM_URL.trim()
+    : "";
+
+  if (liveUrl) {
+    // Show player
+    liveFrame.src = liveUrl;
+    liveFrame.style.display = "block";
+    waitingScreen.style.display = "none";
+    if (playerLivePill) {
+      playerLivePill.innerHTML = '<span class="live-indicator"></span> EN VIVO';
+    }
+  } else {
+    // Show waiting screen
+    liveFrame?.removeAttribute("src");
+    if (liveFrame) liveFrame.style.display = "none";
+    if (waitingScreen) waitingScreen.style.display = "grid";
+  }
+}
+```
+
+**Behavior:**
+- Formats `FESTIVAL_DATE` to Spanish locale (es-PE)
+- Sets iframe `src` only when `IS_LIVE` is true
+- Toggles display between player and waiting screen
+- Updates live indicator badge
+
+### initLiveLayoutSync()
+
+Synchronizes the chat height to match the player height on desktop.
+
+**Location:** `script.js:239`
+
+```javascript
+function initLiveLayoutSync() {
+  const playerShell = $(".player-shell");
+  const controlsBar = $(".player-controls-bar");
+  const chat = $(".live-chat");
+  if (!playerShell || !controlsBar || !chat) return;
+
+  let resizeFrame = null;
+
+  const syncHeights = () => {
+    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+    if (!isDesktop) {
+      // Reset on mobile
+      chat.style.height = "";
+      chat.style.maxHeight = "";
+      chat.style.minHeight = "";
+      return;
+    }
+
+    // Calculate total player height
+    const shellHeight = Math.round(playerShell.getBoundingClientRect().height);
+    const controlsHeight = Math.round(controlsBar.getBoundingClientRect().height);
+    const playerHeight = shellHeight + controlsHeight;
+    if (playerHeight <= 0) return;
+
+    // Apply to chat
+    chat.style.height = `${playerHeight}px`;
+    chat.style.maxHeight = `${playerHeight}px`;
+    chat.style.minHeight = `${playerHeight}px`;
+  };
+
+  const onResize = () => {
+    if (resizeFrame) cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(syncHeights);
+  };
+
+  window.addEventListener("resize", onResize, { passive: true });
+
+  // Use ResizeObserver for better accuracy
+  if ("ResizeObserver" in window) {
+    const observer = new ResizeObserver(syncHeights);
+    observer.observe(playerShell);
+    observer.observe(controlsBar);
+  }
+
+  syncHeights();
+}
+```
+
+**Features:**
+- Desktop-only synchronization (min-width: 768px)
+- Uses `ResizeObserver` for automatic updates
+- Debounced with `requestAnimationFrame`
+- Calculates `.player-shell` + `.player-controls-bar` combined height
+
+### initMobilePlayerInfoToggle()
+
+Handles collapsible stream info panel on mobile devices.
+
+**Location:** `script.js:282`
+
+```javascript
+function initMobilePlayerInfoToggle() {
+  const infoBar = $("#playerInfoBar");
+  const toggleBtn = $("#playerInfoToggle");
+  if (!infoBar || !toggleBtn) return;
+
+  const mobileQuery = window.matchMedia("(max-width: 767px)");
+  const STORAGE_KEY = "mikunki_player_info_collapsed";
+
+  const setCollapsed = (collapsed) => {
+    infoBar.dataset.collapsed = collapsed ? "true" : "false";
+    toggleBtn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    toggleBtn.title = collapsed ? "Mostrar información" : "Ocultar información";
+  };
+
+  const applyDefaultState = () => {
+    if (!mobileQuery.matches) {
+      setCollapsed(false);
+      return;
+    }
+
+    // Restore saved state on mobile
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === "true" || saved === "false") {
+      setCollapsed(saved === "true");
+      return;
+    }
+
+    // Default to collapsed on mobile
+    setCollapsed(true);
+  };
+
+  toggleBtn.addEventListener("click", () => {
+    const isCollapsed = infoBar.dataset.collapsed === "true";
+    const nextCollapsed = !isCollapsed;
+    setCollapsed(nextCollapsed);
+    localStorage.setItem(STORAGE_KEY, String(nextCollapsed));
+  });
+
+  window.addEventListener("resize", applyDefaultState, { passive: true });
+  applyDefaultState();
+}
+```
+
+**Features:**
+- Saves collapse state to `localStorage`
+- Defaults to collapsed on mobile (max-width: 767px)
+- Always expanded on desktop
+- Accessible with `aria-expanded` attributes
+
+## HTML Structure
+
+```html
+<div class="player-column" id="livePlayerPanel">
+  <div class="player-shell">
+    <!-- Vimeo iframe -->
+    <iframe id="liveFrame" class="live-frame" 
+            title="Transmisión en vivo del festival"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen></iframe>
+    
+    <!-- Waiting screen -->
+    <div id="waitingScreen" class="waiting" role="status" aria-live="polite">
+      <div>
+        <img class="waiting-logo" src="logo.svg" alt="Logo" />
+        <h3 class="panel-title">La transmisión comenzará pronto...</h3>
+        <p id="waitingDate"></p>
+        <div class="pulse-wave" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+    
+    <span class="player-live-pill">
+      <span class="live-indicator"></span> EN VIVO
+    </span>
+    
+    <div class="scan-lines" aria-hidden="true"></div>
+  </div>
+
+  <!-- Controls bar -->
+  <div class="player-controls-bar" id="playerInfoBar" data-collapsed="false">
+    <!-- Channel info, share button, toggle -->
+  </div>
+</div>
+```
+
+## CSS Variables
+
+Customize the player appearance:
+
+```css
+:root {
+  --red-main: #CC0000;        /* Player border color */
+  --fire-1: #FF6600;          /* Live pill accent */
+  --gold: #FFD700;            /* Verified badge */
+  --glow-red: 0 0 40px #FF4400, 0 0 80px rgba(204, 0, 0, 0.5);
+}
+
+.player-shell {
+  aspect-ratio: 16/9;         /* Player dimensions */
+  border: 1px solid rgba(255, 100, 0, 0.4);
+  border-radius: 12px 12px 0 0;
+  box-shadow: var(--glow-red);
+  background: #0a0000;
+}
+```
+
+## Implementation Guide
+
+<Steps>
+  <Step title="Set Configuration">
+    Update the `CONFIG` object in `script.js`:
+    ```javascript
+    const CONFIG = {
+      STREAM_URL: "https://player.vimeo.com/video/YOUR_VIDEO_ID?autoplay=1&muted=1",
+      IS_LIVE: true,
+      FESTIVAL_DATE: new Date("2025-11-18T10:00:00")
+    };
+    ```
+  </Step>
+  
+  <Step title="Initialize on DOMContentLoaded">
+    The functions are called automatically:
+    ```javascript
+    document.addEventListener("DOMContentLoaded", () => {
+      initLiveStream();
+      initLiveLayoutSync();
+      initMobilePlayerInfoToggle();
+    });
+    ```
+  </Step>
+  
+  <Step title="Customize Styling">
+    Modify CSS variables in `styles.css` for brand colors:
+    ```css
+    :root {
+      --red-main: #YOUR_COLOR;
+      --fire-1: #YOUR_ACCENT;
+    }
+    ```
+  </Step>
+  
+  <Step title="Test Responsive Behavior">
+    - Desktop: Chat syncs with player height
+    - Mobile: Info panel collapses by default
+    - Waiting screen: Shows when `IS_LIVE: false`
+  </Step>
+</Steps>
+
+## Visual Effects
+
+### Live Indicator
+
+Animated pulsing dot on the live badge:
+
+```css
+.live-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff4444;
+  animation: twitchLivePulse 1.2s infinite;
+}
+
+@keyframes twitchLivePulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.65); }
+  70% { box-shadow: 0 0 0 9px rgba(255, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+}
+```
+
+### Scan Lines
+
+Retro CRT effect overlay:
+
+```css
+.scan-lines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03) 0 2px,
+    transparent 2px 6px
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+```
+
+### Pulse Wave Animation
+
+Waiting screen audio visualizer:
+
+```javascript
+<div class="pulse-wave">
+  <span></span><span></span><span></span><span></span><span></span>
+</div>
+```
+
+```css
+.pulse-wave span {
+  width: 6px;
+  background: linear-gradient(180deg, var(--gold), var(--fire-1));
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+.pulse-wave span:nth-child(1) { animation-delay: 0s; height: 20%; }
+.pulse-wave span:nth-child(2) { animation-delay: 0.1s; height: 40%; }
+.pulse-wave span:nth-child(3) { animation-delay: 0.2s; height: 60%; }
+```
+
+## Accessibility
+
+- `role="status"` and `aria-live="polite"` on waiting screen
+- `aria-expanded` for mobile toggle button
+- Descriptive `title` attributes
+- `allowfullscreen` and proper iframe `allow` permissions

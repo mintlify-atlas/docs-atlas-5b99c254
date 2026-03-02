@@ -1,0 +1,400 @@
+---
+title: Festival date
+description: Configure the festival date and countdown timer for your event
+---
+
+## Overview
+
+The Mikunki Shapshico website includes a dynamic countdown timer that counts down to your festival's start time. The date is configured in the JavaScript `CONFIG` object.
+
+## Setting the Festival Date
+
+The festival date is defined in `script.js` at line 13:
+
+```javascript script.js (lines 10-15)
+const CONFIG = {
+  STREAM_URL: "https://player.vimeo.com/video/76979871?autoplay=1&muted=1&title=0&byline=0&portrait=0",
+  IS_LIVE: true,
+  FESTIVAL_DATE: new Date("2025-11-18T10:00:00"),
+  PARTICLE_COUNT: 25
+};
+```
+
+<Steps>
+  <Step title="Open script.js">
+    Locate the `CONFIG` object at the top of the file (line 10)
+  </Step>
+  
+  <Step title="Update FESTIVAL_DATE">
+    Change the date string to your festival's start date and time:
+    
+    ```javascript
+    FESTIVAL_DATE: new Date("2025-11-18T10:00:00")
+    ```
+    
+    Format: `YYYY-MM-DDTHH:MM:SS`
+  </Step>
+  
+  <Step title="Save and test">
+    Save the file and refresh your browser to see the updated countdown
+  </Step>
+</Steps>
+
+## Date Format Guide
+
+The date string uses the ISO 8601 format:
+
+<ParamField path="YYYY" type="year" required>
+  Four-digit year (e.g., 2025)
+</ParamField>
+
+<ParamField path="MM" type="month" required>
+  Two-digit month (01-12)
+</ParamField>
+
+<ParamField path="DD" type="day" required>
+  Two-digit day (01-31)
+</ParamField>
+
+<ParamField path="HH" type="hour" required>
+  Two-digit hour in 24-hour format (00-23)
+</ParamField>
+
+<ParamField path="MM" type="minute" required>
+  Two-digit minute (00-59)
+</ParamField>
+
+<ParamField path="SS" type="second" default="00">
+  Two-digit second (00-59) - optional, defaults to 00
+</ParamField>
+
+### Examples
+
+<Tabs>
+  <Tab title="Morning Event">
+    ```javascript
+    // November 18, 2025 at 10:00 AM
+    FESTIVAL_DATE: new Date("2025-11-18T10:00:00")
+    ```
+  </Tab>
+  
+  <Tab title="Afternoon Event">
+    ```javascript
+    // December 15, 2025 at 3:30 PM
+    FESTIVAL_DATE: new Date("2025-12-15T15:30:00")
+    ```
+  </Tab>
+  
+  <Tab title="Evening Event">
+    ```javascript
+    // June 20, 2026 at 8:00 PM
+    FESTIVAL_DATE: new Date("2026-06-20T20:00:00")
+    ```
+  </Tab>
+  
+  <Tab title="Midnight Event">
+    ```javascript
+    // January 1, 2026 at midnight
+    FESTIVAL_DATE: new Date("2026-01-01T00:00:00")
+    ```
+  </Tab>
+</Tabs>
+
+## How the Countdown Works
+
+The countdown timer is powered by the `initCountdown()` function in `script.js` (lines 161-200):
+
+```javascript script.js
+function initCountdown() {
+  const daysEl = $("#days");
+  const hoursEl = $("#hours");
+  const minutesEl = $("#minutes");
+  const secondsEl = $("#seconds");
+
+  function updateCounter() {
+    const now = Date.now();
+    const diff = Math.max(0, CONFIG.FESTIVAL_DATE.getTime() - now);
+    
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const m = Math.floor((diff / (1000 * 60)) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+
+    daysEl.textContent = String(d).padStart(2, "0");
+    hoursEl.textContent = String(h).padStart(2, "0");
+    minutesEl.textContent = String(m).padStart(2, "0");
+    secondsEl.textContent = String(s).padStart(2, "0");
+  }
+
+  updateCounter();
+  setInterval(updateCounter, 1000);
+}
+```
+
+### Key Features
+
+- **Real-time updates**: Counter updates every second
+- **Auto-stop**: When countdown reaches zero, it stops at `00:00:00:00`
+- **Zero padding**: Single digits are padded with leading zeros (e.g., `05` instead of `5`)
+- **Never negative**: Uses `Math.max(0, ...)` to prevent negative numbers
+
+## HTML Structure
+
+The countdown is displayed in `index.html` (lines 101-109):
+
+```html index.html
+<div class="countdown" aria-label="Countdown to festival">
+  <div class="count-cell">
+    <strong id="days">00</strong>
+    <span>Days</span>
+  </div>
+  <span class="count-separator">:</span>
+  <div class="count-cell">
+    <strong id="hours">00</strong>
+    <span>Hours</span>
+  </div>
+  <span class="count-separator">:</span>
+  <div class="count-cell">
+    <strong id="minutes">00</strong>
+    <span>Min</span>
+  </div>
+  <span class="count-separator">:</span>
+  <div class="count-cell">
+    <strong id="seconds">00</strong>
+    <span>Sec</span>
+  </div>
+</div>
+```
+
+## Customizing the Display
+
+### Change Labels
+
+Update the text labels in `index.html`:
+
+```html
+<div class="count-cell">
+  <strong id="days">00</strong>
+  <span>Días</span>  <!-- Spanish -->
+</div>
+```
+
+### Hide Seconds
+
+For a cleaner look, hide the seconds:
+
+```css styles.css
+.count-cell:last-of-type,
+.count-separator:last-of-type {
+  display: none;
+}
+```
+
+### Show Only Days
+
+For far-future events, show only days:
+
+```css styles.css
+.count-cell:not(:first-of-type),
+.count-separator {
+  display: none;
+}
+
+.count-cell:first-of-type {
+  font-size: 4rem;
+}
+```
+
+## Timezone Considerations
+
+<Warning>
+  **Important**: The `new Date()` constructor interprets the date string in the **user's local timezone**. This means:
+  
+  - A user in New York will see countdown to 10:00 AM Eastern
+  - A user in Los Angeles will see countdown to 10:00 AM Pacific
+  - Both will arrive at different actual times
+</Warning>
+
+### Solution 1: Use UTC Time
+
+Specify the exact moment in UTC:
+
+```javascript
+// Festival at 10:00 AM Peru Time (UTC-5)
+// = 15:00 UTC (3:00 PM UTC)
+FESTIVAL_DATE: new Date("2025-11-18T15:00:00Z")
+```
+
+The `Z` suffix means UTC.
+
+### Solution 2: Specify Timezone Offset
+
+```javascript
+// 10:00 AM in UTC-5 (Peru)
+FESTIVAL_DATE: new Date("2025-11-18T10:00:00-05:00")
+```
+
+### Solution 3: Use a Library
+
+For complex timezone handling, use a library:
+
+<Tabs>
+  <Tab title="date-fns-tz">
+    ```javascript
+    import { zonedTimeToUtc } from 'date-fns-tz';
+    
+    const peruTime = zonedTimeToUtc('2025-11-18 10:00:00', 'America/Lima');
+    FESTIVAL_DATE: peruTime
+    ```
+  </Tab>
+  
+  <Tab title="Moment.js">
+    ```javascript
+    const moment = require('moment-timezone');
+    
+    FESTIVAL_DATE: moment.tz("2025-11-18 10:00", "America/Lima").toDate()
+    ```
+  </Tab>
+</Tabs>
+
+## Testing the Countdown
+
+### Test with Near-Future Date
+
+Set a date a few minutes in the future to test:
+
+```javascript
+// 5 minutes from now
+FESTIVAL_DATE: new Date(Date.now() + 5 * 60 * 1000)
+```
+
+### Test with Past Date
+
+Verify the countdown stops at zero:
+
+```javascript
+// Yesterday
+FESTIVAL_DATE: new Date("2024-01-01T10:00:00")
+```
+
+You should see: `00:00:00:00`
+
+## Updating the Waiting Screen
+
+The live stream waiting screen also displays the festival date (line 256 in `index.html`).
+
+Update the date display in `script.js` (lines 212-219):
+
+```javascript script.js
+if (waitingDate) {
+  waitingDate.textContent = `Event date: ${CONFIG.FESTIVAL_DATE.toLocaleDateString("en-US", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  })}`;
+}
+```
+
+### Customize Date Format
+
+<Tabs>
+  <Tab title="Long Format">
+    ```javascript
+    toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    })
+    // Output: Tuesday, November 18, 2025
+    ```
+  </Tab>
+  
+  <Tab title="Short Format">
+    ```javascript
+    toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    })
+    // Output: Nov 18, 2025
+    ```
+  </Tab>
+  
+  <Tab title="Spanish Format">
+    ```javascript
+    toLocaleDateString("es-PE", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    })
+    // Output: martes, 18 de noviembre de 2025
+    ```
+  </Tab>
+</Tabs>
+
+## Multiple Events
+
+For festivals with multiple days or events:
+
+<Accordion title="Track multiple dates">
+  ```javascript script.js
+  const CONFIG = {
+    FESTIVAL_START: new Date("2025-11-18T10:00:00"),
+    FESTIVAL_END: new Date("2025-11-20T22:00:00"),
+    MAIN_EVENT: new Date("2025-11-19T15:00:00"),
+    
+    // Use START for countdown
+    get FESTIVAL_DATE() {
+      return this.FESTIVAL_START;
+    }
+  };
+  ```
+</Accordion>
+
+<Accordion title="Show next upcoming event">
+  ```javascript script.js
+  const EVENTS = [
+    { name: "Opening", date: new Date("2025-11-18T10:00:00") },
+    { name: "Competition", date: new Date("2025-11-18T14:00:00") },
+    { name: "Awards", date: new Date("2025-11-18T18:00:00") }
+  ];
+  
+  function getNextEvent() {
+    const now = Date.now();
+    return EVENTS.find(e => e.date.getTime() > now) || EVENTS[0];
+  }
+  
+  const CONFIG = {
+    get FESTIVAL_DATE() {
+      return getNextEvent().date;
+    }
+  };
+  ```
+</Accordion>
+
+## Troubleshooting
+
+<Accordion title="Countdown shows 00:00:00:00 immediately">
+  **Cause**: The festival date is in the past.
+  
+  **Solution**: Check the date format and ensure the year, month, and day are correct. Verify you're using 24-hour time format.
+</Accordion>
+
+<Accordion title="Countdown shows wrong time">
+  **Cause**: Timezone mismatch between your local time and the festival location.
+  
+  **Solution**: Use UTC time with the `Z` suffix or specify the timezone offset (see Timezone Considerations above).
+</Accordion>
+
+<Accordion title="Countdown doesn't update">
+  **Cause**: JavaScript error preventing the timer from running.
+  
+  **Solution**: Open browser console (F12) and check for errors. Ensure `script.js` is loaded correctly.
+</Accordion>
+
+<Tip>
+  **Pro tip**: Use [World Time Buddy](https://www.worldtimebuddy.com/) to convert between timezones and verify your UTC offset is correct.
+</Tip>

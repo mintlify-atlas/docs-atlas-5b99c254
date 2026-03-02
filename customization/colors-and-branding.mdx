@@ -1,0 +1,309 @@
+---
+title: Colors and branding
+description: Customize the visual identity of your Mikunki Shapshico festival website with CSS variables and brand colors
+---
+
+## Overview
+
+The Mikunki Shapshico website uses a comprehensive system of CSS variables that make it easy to customize colors, spacing, typography, and visual effects throughout the entire site.
+
+## Color Palette
+
+All colors are defined as CSS variables in `styles.css` starting at line 7. You can customize these to match your festival's brand identity.
+
+### Primary Colors
+
+<ParamField path="--red-main" type="color" default="#CC0000">
+  Main brand color used for primary elements and accents
+</ParamField>
+
+<ParamField path="--red-deep" type="color" default="#1A0000">
+  Deep background color for the main body and dark sections
+</ParamField>
+
+<ParamField path="--red-bright" type="color" default="#FF3333">
+  Bright accent color for hover states and highlights
+</ParamField>
+
+### Fire Theme Colors
+
+<ParamField path="--fire-1" type="color" default="#FF6600">
+  Primary fire color for warm accents
+</ParamField>
+
+<ParamField path="--fire-2" type="color" default="#FF8C00">
+  Secondary fire color for gradients
+</ParamField>
+
+### Accent Colors
+
+<ParamField path="--gold" type="color" default="#FFD700">
+  Gold accent for premium elements and highlights
+</ParamField>
+
+<ParamField path="--gold-dark" type="color" default="#B8860B">
+  Darker gold for text and borders
+</ParamField>
+
+## Applying Custom Colors
+
+<Steps>
+  <Step title="Open styles.css">
+    Locate the `:root` selector at the top of `styles.css` (line 7)
+  </Step>
+  
+  <Step title="Modify color variables">
+    Update the hex values for your chosen colors:
+    
+    ```css
+    :root {
+      /* Your custom colors */
+      --red-main: #8B0000;      /* Darker red */
+      --fire-1: #FF4500;         /* Orange-red */
+      --gold: #FFA500;           /* Orange gold */
+    }
+    ```
+  </Step>
+  
+  <Step title="Test your changes">
+    Open `index.html` in your browser to see the updated color scheme
+  </Step>
+</Steps>
+
+## Typography
+
+The site uses two Google Fonts that complement the festival aesthetic:
+
+<ParamField path="--heading" type="font-family" default="'Bebas Neue', sans-serif">
+  Display font for headings and titles - bold, condensed, impactful
+</ParamField>
+
+<ParamField path="--body" type="font-family" default="'Poppins', sans-serif">
+  Body text font - clean, modern, highly readable
+</ParamField>
+
+### Changing Fonts
+
+<Accordion title="How to use different Google Fonts">
+  1. Visit [Google Fonts](https://fonts.google.com) and select your fonts
+  2. Update the font link in `index.html` (line 34):
+  
+  ```html
+  <link href="https://fonts.googleapis.com/css2?family=Your+Font:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  ```
+  
+  3. Update the CSS variables in `styles.css`:
+  
+  ```css
+  :root {
+    --heading: "Your Display Font", sans-serif;
+    --body: "Your Body Font", sans-serif;
+  }
+  ```
+</Accordion>
+
+## Visual Effects
+
+The site includes several CSS variable-based visual effects:
+
+### Glow Effects
+
+```css styles.css
+:root {
+  /* Red glow for fire elements */
+  --glow-red: 0 0 40px #FF4400, 0 0 80px rgba(204, 0, 0, 0.5);
+  
+  /* Gold glow for highlights */
+  --glow-gold: 0 0 30px rgba(255, 215, 0, 0.4);
+}
+```
+
+### Shadows
+
+```css styles.css
+:root {
+  /* Card shadow */
+  --shadow-card: 0 14px 28px rgba(0, 0, 0, 0.28);
+  
+  /* Elevated element shadow */
+  --shadow-elevated: 0 20px 40px rgba(0, 0, 0, 0.35);
+}
+```
+
+### Transitions
+
+```css styles.css
+:root {
+  --transition-fast: 0.2s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+```
+
+## Layout Variables
+
+Control spacing and dimensions:
+
+<ParamField path="--max" type="dimension" default="1200px">
+  Maximum width for the main container
+</ParamField>
+
+<ParamField path="--nav-h" type="dimension" default="78px">
+  Height of the navigation bar
+</ParamField>
+
+<ParamField path="--radius" type="dimension" default="18px">
+  Border radius for large elements (cards, buttons)
+</ParamField>
+
+<ParamField path="--radius-sm" type="dimension" default="12px">
+  Border radius for small elements
+</ParamField>
+
+## Brand Assets
+
+### Logo and Icons
+
+The site uses Cloudinary for image hosting. Update these URLs in `index.html`:
+
+<Tabs>
+  <Tab title="Festival Logo">
+    ```html index.html
+    <!-- Main logo (line 59) -->
+    <img src="https://res.cloudinary.com/renatoez/image/upload/v1771435323/icono_ekadg2.svg"
+         alt="Festival Icon" />
+    
+    <!-- Wordmark (line 61) -->
+    <img src="https://res.cloudinary.com/renatoez/image/upload/v1771435258/letras_vbzu8k.svg"
+         alt="Festival Name" />
+    ```
+  </Tab>
+  
+  <Tab title="Sponsor Logos">
+    ```html index.html
+    <!-- University logo (line 523) -->
+    <img src="https://res.cloudinary.com/renatoez/image/upload/v1771435550/unheval_logo_g9zgkv.png"
+         alt="UNHEVAL Logo" />
+    
+    <!-- School logo (line 531) -->
+    <img src="https://res.cloudinary.com/renatoez/image/upload/v1771435028/COMUNICACI%C3%93N_c5eeie.png"
+         alt="School Logo" />
+    ```
+  </Tab>
+  
+  <Tab title="Favicon">
+    ```html index.html
+    <!-- Add to <head> section -->
+    <link rel="icon" type="image/svg+xml" href="/path/to/your-favicon.svg" />
+    <link rel="icon" type="image/png" href="/path/to/your-favicon.png" />
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  **Using Cloudinary**: The site uses Cloudinary for optimized image delivery. You can:
+  - Replace the URLs with your own Cloudinary account
+  - Use any other CDN or hosting service
+  - Store images locally in an `images/` folder
+</Note>
+
+## Meta Tags and SEO
+
+Update the site metadata in `index.html` (lines 7-27):
+
+```html index.html
+<title>Your Festival Name | Official Website</title>
+<meta name="description" content="Your festival description" />
+
+<!-- Open Graph -->
+<meta property="og:title" content="Your Festival Name" />
+<meta property="og:description" content="Your description" />
+<meta property="og:image" content="https://your-domain.com/og-image.jpg" />
+<meta property="og:url" content="https://your-domain.com" />
+
+<!-- Twitter -->
+<meta property="twitter:title" content="Your Festival Name" />
+<meta property="twitter:description" content="Your description" />
+<meta property="twitter:image" content="https://your-domain.com/og-image.jpg" />
+```
+
+## Complete Color Scheme Example
+
+Here's an example of a completely custom color scheme:
+
+<Tabs>
+  <Tab title="Blue/Teal Theme">
+    ```css styles.css
+    :root {
+      /* Blue theme */
+      --red-main: #0066CC;
+      --red-deep: #001a33;
+      --red-bright: #3399FF;
+      --fire-1: #00D4AA;
+      --fire-2: #00CED1;
+      --gold: #FFD700;
+      --gold-dark: #FFA500;
+      
+      /* Updated effects */
+      --glow-red: 0 0 40px #00D4AA, 0 0 80px rgba(0, 212, 170, 0.5);
+      --glow-gold: 0 0 30px rgba(255, 215, 0, 0.4);
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Green/Nature Theme">
+    ```css styles.css
+    :root {
+      /* Nature theme */
+      --red-main: #228B22;
+      --red-deep: #0a2e0a;
+      --red-bright: #32CD32;
+      --fire-1: #FFD700;
+      --fire-2: #FFA500;
+      --gold: #F4A460;
+      --gold-dark: #D2691E;
+      
+      /* Updated effects */
+      --glow-red: 0 0 40px #32CD32, 0 0 80px rgba(50, 205, 50, 0.5);
+      --glow-gold: 0 0 30px rgba(244, 164, 96, 0.4);
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Purple/Magenta Theme">
+    ```css styles.css
+    :root {
+      /* Purple theme */
+      --red-main: #8B008B;
+      --red-deep: #1a001a;
+      --red-bright: #DA70D6;
+      --fire-1: #FF69B4;
+      --fire-2: #FF1493;
+      --gold: #FFD700;
+      --gold-dark: #FF8C00;
+      
+      /* Updated effects */
+      --glow-red: 0 0 40px #FF69B4, 0 0 80px rgba(255, 105, 180, 0.5);
+      --glow-gold: 0 0 30px rgba(255, 215, 0, 0.4);
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  **Accessibility**: When changing colors, ensure sufficient contrast between text and backgrounds. Use tools like [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/) to verify WCAG compliance.
+</Warning>
+
+## Testing Your Changes
+
+After customizing colors and branding:
+
+1. **Visual inspection**: Open `index.html` in multiple browsers
+2. **Mobile testing**: Check responsive behavior on different screen sizes
+3. **Dark sections**: Verify colors work well on both light and dark backgrounds
+4. **Hover states**: Test interactive elements (buttons, links, cards)
+5. **Accessibility**: Use browser DevTools to check contrast ratios
+
+<Tip>
+  **Quick preview**: Use browser DevTools to test color changes live before editing the CSS file. Right-click any element, select "Inspect", and modify CSS variables in the Styles panel.
+</Tip>

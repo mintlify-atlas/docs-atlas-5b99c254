@@ -1,0 +1,585 @@
+---
+title: 'Chat System'
+description: 'Twitch-style live chat with user authentication, superchats, points economy, and tier system'
+---
+
+# Chat System
+
+A fully-featured Twitch-style chat system with user login, points economy, superchat tiers, and simulated messages.
+
+## Overview
+
+The chat system includes:
+- **User authentication** with customizable username and color
+- **Points economy** - users earn 2 points every 30 seconds
+- **Three-tier superchats** - Bronze (40pts), Silver (80pts), Gold (120pts)
+- **Simulated messages** from moderators and users
+- **Live viewer count** with randomized fluctuation
+- **Emoji quick-select** buttons
+
+## Configuration Constants
+
+<ParamField path="MODERATORS" type="Set<string>">
+  Set of usernames with moderator badges:
+  ```javascript
+  const MODERATORS = new Set(["UNHEVALista", "FestivalFan", "MikunFan", "Moderador"]);
+  ```
+</ParamField>
+
+<ParamField path="SUPERCHAT_COST_POINTS" type="number" default="40">
+  Minimum cost for bronze-tier superchats (used in legacy logic).
+</ParamField>
+
+<ParamField path="TIERS" type="object">
+  Three-tier superchat configuration:
+  
+  ```javascript
+  const TIERS = {
+    bronze: { key: "bronze", css: "tier-bronze", icon: "fa-medal", label: "Bronce", amount: 40 },
+    silver: { key: "silver", css: "tier-silver", icon: "fa-gem", label: "Plata", amount: 80 },
+    gold: { key: "gold", css: "tier-gold", icon: "fa-crown", label: "Oro", amount: 120 }
+  };
+  ```
+</ParamField>
+
+<ParamField path="NAME_COLORS" type="string[]">
+  Predefined color palette for usernames:
+  ```javascript
+  const NAME_COLORS = [
+    "#FF6600", "#FF4500", "#FFD700", "#00D4AA", "#1E90FF",
+    "#FF69B4", "#7B68EE", "#00CED1", "#FF6347", "#32CD32"
+  ];
+  ```
+</ParamField>
+
+## Core Functions
+
+### initChat()
+
+Main initialization function that sets up the entire chat system.
+
+**Location:** `script.js:371`
+
+```javascript
+function initChat() {
+  // DOM element references
+  const chatMessages = $("#chatMessages");
+  const chatViewers = $("#chatViewers");
+  const superchatBanner = $("#superchatBanner");
+  // ... (more elements)
+  
+  // State variables
+  let currentUser = null;
+  let selectedColor = "#FF4500";
+  let selectedSuperchatTier = "bronze";
+  const highlightedSuperchats = [];
+  
+  // Restore session from localStorage
+  const saved = localStorage.getItem("mikunki_chat_user");
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      if (typeof currentUser.points !== "number") currentUser.points = 30;
+      saveCurrentUser();
+      showLoggedIn();
+    } catch (e) {
+      localStorage.removeItem("mikunki_chat_user");
+    }
+  }
+  
+  // Initialize viewer count
+  let viewers = Math.floor(Math.random() * 80) + 45;
+  // ...
+}
+```
+
+### User Authentication
+
+#### showLoggedIn()
+
+Displays the logged-in chat interface.
+
+**Location:** `script.js:660`
+
+```javascript
+function showLoggedIn() {
+  if (loginOverlay) loginOverlay.style.display = "none";
+  if (loginForm) loginForm.style.display = "none";
+  if (loggedInPanel) loggedInPanel.style.display = "";
+  if (userBadge) {
+    userBadge.innerHTML = `<i class="fa-solid fa-circle" style="color:${currentUser.color};font-size:.5rem;vertical-align:middle;margin-right:.3rem"></i> ${currentUser.name}`;
+  }
+  updatePointsUI();
+}
+```
+
+#### Login Flow
+
+**Location:** `script.js:701`
+
+```javascript
+loginSubmit?.addEventListener("click", () => {
+  const name = regName?.value.trim();
+  if (!name) {
+    regName?.focus();
+    return;
+  }
+  currentUser = { name, color: selectedColor, points: 30 };
+  saveCurrentUser();
+  showLoggedIn();
+  addMessage("Sistema", `${name} se unió al chat 👋", "rgba(255,255,255,.5)", false);
+});
+```
+
+**Initial Points:** Users start with 30 points
+
+### Points Economy
+
+#### updatePointsUI()
+
+Updates the points display and enables/disables tier buttons.
+
+**Location:** `script.js:533`
+
+```javascript
+function updatePointsUI() {
+  if (!currentUser) return;
+  const points = Math.max(0, Math.floor(currentUser.points || 0));
+  const selectedTier = getTierByKey(selectedSuperchatTier);
+
+  // Update points badge
+  if (chatPoints) {
+    chatPoints.innerHTML = `<i class="fa-solid fa-star"></i> ${points} pts`;
+  }
+
+  // Enable/disable tier buttons based on points
+  tierButtons.forEach((btn) => {
+    const cost = Number(btn.dataset.cost || 0);
+    btn.disabled = points < cost;
+  });
+
+  // Auto-downgrade tier if insufficient points
+  if (points < selectedTier.amount) {
+    const best = getTierData(points);
+    setSelectedTier(best ? best.css.replace("tier-", "") : "bronze");
+  }
+
+  // Update superchat send button
+  if (chatSuperchatSend) {
+    chatSuperchatSend.classList.remove("tier-bronze", "tier-silver", "tier-gold");
+    const activeTier = getTierByKey(selectedSuperchatTier);
+    if (points < activeTier.amount) {
+      chatSuperchatSend.disabled = true;
+      chatSuperchatSend.title = `Te faltan ${SUPERCHAT_COST_POINTS - points} puntos`;
+      chatSuperchatSend.textContent = `Superchat ${SUPERCHAT_COST_POINTS} pts`;
+    } else {
+      chatSuperchatSend.disabled = false;
+      chatSuperchatSend.classList.add(activeTier.css);
+      chatSuperchatSend.title = `Enviar superchat ${activeTier.label} (${activeTier.amount} pts)`;
+      chatSuperchatSend.innerHTML = `<i class="fa-solid ${activeTier.icon}"></i> ${activeTier.label} ${activeTier.amount} pts`;
+    }
+  }
+}
+```
+
+#### Points Earning Interval
+
+**Location:** `script.js:815`
+
+```javascript
+setInterval(() => {
+  if (!currentUser || document.hidden) return;
+  currentUser.points = Math.min(9999, (currentUser.points || 0) + 2);
+  saveCurrentUser();
+  updatePointsUI();
+}, 30000); // Every 30 seconds
+```
+
+**Rate:** +2 points every 30 seconds (4 points per minute)
+**Maximum:** 9,999 points
+**Paused:** When tab is hidden (`document.hidden`)
+
+### Message System
+
+#### addMessage()
+
+Adds a regular chat message.
+
+**Location:** `script.js:598`
+
+```javascript
+function addMessage(name, text, color, isMod) {
+  if (!chatMessages) return;
+  
+  const div = document.createElement("div");
+  div.className = "chat-msg";
+  const badge = isMod ? `<i class="fa-solid fa-shield-halved chat-mod" title="Moderador"></i>` : "";
+  div.innerHTML = `${badge}<span class="chat-name" style="color:${color}">${name}:</span> ${text}<span class="chat-time">${getTimeStr()}</span>`;
+  
+  chatMessages.appendChild(div);
+  
+  // Limit normal messages (keep welcome + 40 messages)
+  while (chatMessages.querySelectorAll('.chat-msg').length > 40) {
+    chatMessages.querySelector('.chat-msg')?.remove();
+  }
+
+  // Limit superchats (max 3)
+  while (chatMessages.querySelectorAll('.chat-superchat').length > 3) {
+    chatMessages.querySelector('.chat-superchat')?.remove();
+  }
+  
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+```
+
+**Limits:**
+- Maximum 40 regular messages displayed
+- Maximum 3 superchats displayed simultaneously
+- Auto-scrolls to bottom
+
+#### addSuperchat()
+
+Adds a highlighted superchat message.
+
+**Location:** `script.js:622`
+
+```javascript
+function addSuperchat(name, text, amount = "40 pts", isMod = true) {
+  if (!chatMessages) return;
+  const points = parsePoints(amount);
+  const tier = getTierData(points) || { css: "tier-bronze", label: "Bronce" };
+  
+  // Create superchat element
+  const div = document.createElement("div");
+  div.className = `chat-superchat ${tier.css}`;
+  const roleBadge = isMod
+    ? '<i class="fa-solid fa-shield-halved chat-mod" title="Moderador"></i>'
+    : '<i class="fa-solid fa-user chat-mod" title="Miembro"></i>';
+
+  div.innerHTML = `
+    <div class="superchat-badge"><i class="fa-solid fa-star"></i> ${tier.label} SUPERCHAT ${amount}</div>
+    <div><span class="chat-name">${name}</span> ${roleBadge}</div>
+    <div class="superchat-text">${text}</div>
+    <span class="chat-time">${getTimeStr()}</span>
+  `;
+  
+  chatMessages.appendChild(div);
+  
+  // Limit superchats
+  while (chatMessages.querySelectorAll('.chat-superchat').length > 3) {
+    chatMessages.querySelector('.chat-superchat')?.remove();
+  }
+  
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  
+  // Update banner strip
+  if (superchatBanner) {
+    highlightedSuperchats.unshift({ name, amount });
+    while (highlightedSuperchats.length > 2) highlightedSuperchats.pop();
+    refreshSuperchatStrip();
+  }
+}
+```
+
+**Features:**
+- Automatic tier detection based on points
+- Adds to top of superchat banner (max 2)
+- Different badge for moderators vs members
+
+### Tier System
+
+#### getTierData()
+
+Returns tier configuration based on point amount.
+
+**Location:** `script.js:508`
+
+```javascript
+function getTierData(points) {
+  if (points >= 120) return { css: "tier-gold", icon: "fa-crown", label: "Oro", amount: 120 };
+  if (points >= 80) return { css: "tier-silver", icon: "fa-gem", label: "Plata", amount: 80 };
+  if (points >= 40) return { css: "tier-bronze", icon: "fa-medal", label: "Bronce", amount: 40 };
+  return null;
+}
+```
+
+#### setSelectedTier()
+
+Updates the selected superchat tier and collapses tier panel.
+
+**Location:** `script.js:519`
+
+```javascript
+function setSelectedTier(key) {
+  const tier = getTierByKey(key);
+  selectedSuperchatTier = tier.key;
+  localStorage.setItem(SELECTED_TIER_KEY, tier.key);
+
+  tierButtons.forEach((btn) => {
+    const active = btn.dataset.tier === tier.key;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-pressed", String(active));
+  });
+
+  setTierPanelCollapsed(true);
+}
+```
+
+**Persistence:** Saved to `localStorage` as `mikunki_chat_selected_tier`
+
+### Sending Messages
+
+#### sendUserMessage()
+
+**Location:** `script.js:724`
+
+```javascript
+function sendUserMessage() {
+  if (!currentUser || !chatInput) return;
+  const text = chatInput.value.trim();
+  if (!text) return;
+  addMessage(currentUser.name, text, currentUser.color, false);
+  chatInput.value = "";
+  chatInput.focus();
+}
+```
+
+#### sendUserSuperchat()
+
+**Location:** `script.js:733`
+
+```javascript
+function sendUserSuperchat() {
+  if (!currentUser || !chatInput) return;
+
+  const text = chatInput.value.trim();
+  const tier = getTierByKey(selectedSuperchatTier);
+  const amount = tier.amount;
+  if (!text) {
+    chatInput.focus();
+    return;
+  }
+
+  // Verify points
+  if ((currentUser.points || 0) < amount) {
+    addMessage("Sistema", `No tienes puntos suficientes para un superchat de ${amount} pts.`, "rgba(255,255,255,.5)", false);
+    return;
+  }
+
+  // Deduct points
+  currentUser.points -= amount;
+  saveCurrentUser();
+  updatePointsUI();
+
+  addSuperchat(currentUser.name, text, `${amount} pts`, false);
+  chatInput.value = "";
+  chatInput.focus();
+}
+```
+
+### Simulated Activity
+
+#### Simulated Messages
+
+**Location:** `script.js:787`
+
+```javascript
+const SIM_MSGS = [
+  "¡Qué buena la comida! 🍖", "Vamos Huánuco! 🔥",
+  "La danza está increíble 💃", "¡Arriba UNHEVAL! 🎉",
+  // ... more messages
+];
+
+function simMessage() {
+  const name = SIM_NAMES[Math.floor(Math.random() * SIM_NAMES.length)];
+  const msg = SIM_MSGS[Math.floor(Math.random() * SIM_MSGS.length)];
+  addMessage(name, msg, pickColor(name), MODERATORS.has(name));
+}
+
+// Initial messages
+setTimeout(simMessage, 2000);
+setTimeout(simMessage, 4500);
+setTimeout(simMessage, 7000);
+
+// Ongoing messages (60% chance every 5 seconds)
+setInterval(() => {
+  if (Math.random() < 0.6) simMessage();
+}, 5000);
+```
+
+#### Simulated Superchats
+
+**Location:** `script.js:794`
+
+```javascript
+const SUPERCHAT_MSGS = [
+  { text: "¡Bienvenidos todos al festival! Disfruten la transmisión 🎉", amount: "120 pts" },
+  { text: "Recuerden usar el hashtag #MikunkiShapshico2025", amount: "90 pts" },
+  // ... more superchats
+];
+
+function simSuperchat() {
+  const modName = MOD_NAMES[Math.floor(Math.random() * MOD_NAMES.length)];
+  const superchat = SUPERCHAT_MSGS[Math.floor(Math.random() * SUPERCHAT_MSGS.length)];
+  addSuperchat(modName, superchat.text, superchat.amount);
+}
+
+// First superchat after 8 seconds
+setTimeout(() => simSuperchat(), 8000);
+
+// Ongoing superchats (40% chance every 20 seconds)
+setInterval(() => {
+  if (Math.random() < 0.4) simSuperchat();
+}, 20000);
+```
+
+#### Viewer Count Animation
+
+**Location:** `script.js:470`
+
+```javascript
+let viewers = Math.floor(Math.random() * 80) + 45; // Start: 45-124
+if (chatViewers) {
+  chatViewers.innerHTML = `<i class="fa-solid fa-eye"></i> ${viewers}`;
+}
+
+setInterval(() => {
+  viewers += Math.floor(Math.random() * 7) - 3; // Change: -3 to +3
+  viewers = Math.max(20, viewers);              // Minimum: 20
+  if (chatViewers) {
+    chatViewers.innerHTML = `<i class="fa-solid fa-eye"></i> ${viewers}`;
+  }
+}, 8000); // Every 8 seconds
+```
+
+## HTML Structure
+
+```html
+<aside class="live-chat" id="liveChatPanel">
+  <div class="chat-header">
+    <div class="chat-title">
+      <i class="fa-solid fa-comments"></i>
+      <span>Chat en vivo</span>
+    </div>
+    <span class="chat-viewers" id="chatViewers">
+      <i class="fa-solid fa-eye"></i> 0
+    </span>
+  </div>
+  
+  <!-- Superchat banner -->
+  <div class="superchat-banner" id="superchatBanner">
+    <div class="superchat-strip-label">
+      <i class="fa-solid fa-star"></i> Superchats <span id="superchatCount">(0)</span>
+    </div>
+    <div class="superchat-strip-list" id="superchatStripList">
+      <!-- Dynamic superchat items -->
+    </div>
+  </div>
+  
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-welcome">
+      <i class="fa-solid fa-fire"></i> ¡Bienvenido al chat!
+    </div>
+  </div>
+  
+  <div class="chat-input-area">
+    <!-- Login overlay or logged-in panel -->
+  </div>
+</aside>
+```
+
+## CSS Customization
+
+### Tier Colors
+
+```css
+.tier-bronze {
+  --sc-rgb: 213, 143, 86;
+  --sc-border: #d58f56;
+  --sc-bg-a: rgba(213, 143, 86, 0.22);
+  --sc-bg-b: rgba(140, 82, 45, 0.14);
+}
+
+.tier-silver {
+  --sc-rgb: 188, 199, 217;
+  --sc-border: #bcc7d9;
+  --sc-bg-a: rgba(188, 199, 217, 0.22);
+  --sc-bg-b: rgba(95, 108, 132, 0.14);
+}
+
+.tier-gold {
+  --sc-rgb: 255, 211, 79;
+  --sc-border: #ffd34f;
+  --sc-bg-a: rgba(255, 211, 79, 0.24);
+  --sc-bg-b: rgba(176, 118, 12, 0.16);
+}
+```
+
+### Chat Dimensions
+
+```css
+.live-chat {
+  height: 520px;
+  max-height: 520px;
+  min-height: 520px;
+}
+
+/* Synced with player on desktop */
+@media (min-width: 768px) {
+  .live-chat {
+    height: var(--synced-height); /* Set by JS */
+  }
+}
+```
+
+## Implementation Guide
+
+<Steps>
+  <Step title="Initialize Chat">
+    The chat system auto-initializes on DOMContentLoaded:
+    ```javascript
+    document.addEventListener("DOMContentLoaded", () => {
+      initChat();
+    });
+    ```
+  </Step>
+  
+  <Step title="Customize Moderators">
+    Edit the `MODERATORS` set to add/remove moderators:
+    ```javascript
+    const MODERATORS = new Set(["Admin", "Moderator"]);
+    ```
+  </Step>
+  
+  <Step title="Adjust Points Economy">
+    Modify earning rate or tier costs:
+    ```javascript
+    // Earning interval (line 815)
+    setInterval(() => {
+      currentUser.points += 5; // Change from 2 to 5
+    }, 30000);
+    
+    // Tier costs
+    const TIERS = {
+      bronze: { amount: 50 },  // Change from 40
+      silver: { amount: 100 }, // Change from 80
+      gold: { amount: 150 }    // Change from 120
+    };
+    ```
+  </Step>
+  
+  <Step title="Configure Simulation">
+    Adjust simulated message frequency:
+    ```javascript
+    // Normal messages (line 805)
+    setInterval(() => {
+      if (Math.random() < 0.8) simMessage(); // Change probability
+    }, 3000); // Change interval
+    
+    // Superchats (line 811)
+    setInterval(() => {
+      if (Math.random() < 0.6) simSuperchat();
+    }, 15000);
+    ```
+  </Step>
+</Steps>

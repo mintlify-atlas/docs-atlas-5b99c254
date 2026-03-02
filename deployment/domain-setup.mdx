@@ -1,0 +1,471 @@
+---
+title: 'Custom Domain Setup'
+description: 'Configure a custom domain for the Mikunki Shapshico festival website'
+---
+
+## Overview
+
+This guide covers configuring a custom domain for your Mikunki Shapshico festival website across different hosting platforms. You'll need access to your domain registrar's DNS settings.
+
+<Note>
+  DNS changes can take 24-48 hours to fully propagate globally, though most changes are visible within a few hours.
+</Note>
+
+## Prerequisites
+
+- A registered domain name (e.g., `mikunkishapshico.com`)
+- Access to your domain registrar's DNS management panel
+- Your website deployed on a hosting platform
+
+## DNS Configuration by Platform
+
+<Tabs>
+  <Tab title="GitHub Pages">
+    <Steps>
+      <Step title="Configure DNS Records">
+        Log in to your domain registrar and add the following DNS records:
+
+        **For Apex Domain (mikunkishapshico.com):**
+
+        Add these A records:
+        ```
+        A    @    185.199.108.153
+        A    @    185.199.109.153
+        A    @    185.199.110.153
+        A    @    185.199.111.153
+        ```
+
+        **For www Subdomain (www.mikunkishapshico.com):**
+
+        Add a CNAME record:
+        ```
+        CNAME    www    <username>.github.io
+        ```
+      </Step>
+
+      <Step title="Enable Custom Domain in GitHub">
+        1. Go to your repository on GitHub
+        2. Navigate to **Settings** > **Pages**
+        3. Under **Custom domain**, enter your domain (e.g., `mikunkishapshico.com`)
+        4. Click **Save**
+        5. Wait for DNS check to complete (green checkmark)
+      </Step>
+
+      <Step title="Enforce HTTPS">
+        After DNS propagation:
+        1. Return to **Settings** > **Pages**
+        2. Check **Enforce HTTPS**
+        3. GitHub will automatically provision an SSL certificate
+      </Step>
+    </Steps>
+
+    <Warning>
+      Don't enable "Enforce HTTPS" until DNS propagation is complete and the domain verification succeeds.
+    </Warning>
+  </Tab>
+
+  <Tab title="Netlify">
+    <Steps>
+      <Step title="Add Custom Domain in Netlify">
+        1. Go to your site dashboard on Netlify
+        2. Navigate to **Domain settings** or **Domain management**
+        3. Click **Add custom domain**
+        4. Enter your domain (e.g., `mikunkishapshico.com`)
+        5. Click **Verify** and then **Add domain**
+      </Step>
+
+      <Step title="Configure DNS Records">
+        Netlify will provide DNS configuration instructions. You have two options:
+
+        **Option A: Use Netlify DNS (Recommended)**
+
+        1. Click **Set up Netlify DNS**
+        2. Netlify will provide nameservers (e.g., `dns1.p01.nsone.net`)
+        3. Go to your domain registrar
+        4. Replace existing nameservers with Netlify's nameservers
+        5. Wait for DNS propagation
+
+        **Option B: External DNS**
+
+        Add these records at your domain registrar:
+
+        **For Apex Domain:**
+        ```
+        A    @    75.2.60.5
+        ```
+        Or use an ALIAS/ANAME record (if supported):
+        ```
+        ALIAS    @    <your-site>.netlify.app
+        ```
+
+        **For www Subdomain:**
+        ```
+        CNAME    www    <your-site>.netlify.app
+        ```
+      </Step>
+
+      <Step title="Enable HTTPS">
+        1. After DNS propagation, return to **Domain settings**
+        2. Click **Verify DNS configuration**
+        3. Netlify will automatically provision a Let's Encrypt SSL certificate
+        4. Enable **Force HTTPS** to redirect all HTTP traffic to HTTPS
+      </Step>
+    </Steps>
+
+    <Tip>
+      Netlify DNS provides automatic SSL, faster propagation, and easier management. It's the recommended option.
+    </Tip>
+  </Tab>
+
+  <Tab title="Vercel">
+    <Steps>
+      <Step title="Add Domain in Vercel">
+        1. Go to your project dashboard on Vercel
+        2. Click **Settings** > **Domains**
+        3. Enter your domain (e.g., `mikunkishapshico.com`)
+        4. Click **Add**
+      </Step>
+
+      <Step title="Configure DNS Records">
+        Vercel will display the required DNS configuration.
+
+        **For Apex Domain (mikunkishapshico.com):**
+
+        Add an A record:
+        ```
+        A    @    76.76.21.21
+        ```
+
+        **For www Subdomain:**
+
+        Add a CNAME record:
+        ```
+        CNAME    www    cname.vercel-dns.com
+        ```
+
+        **Alternative: Use ANAME/ALIAS (if supported):**
+        ```
+        ANAME    @    cname.vercel-dns.com
+        ```
+      </Step>
+
+      <Step title="Verify Configuration">
+        1. Add the DNS records at your domain registrar
+        2. Return to Vercel's Domains settings
+        3. Wait for Vercel to verify (shows "Valid Configuration")
+        4. HTTPS is automatically enabled with SSL certificate
+      </Step>
+    </Steps>
+
+    <Note>
+      Vercel automatically provisions SSL certificates and handles renewals. No additional configuration needed.
+    </Note>
+  </Tab>
+
+  <Tab title="Traditional Hosting">
+    <Steps>
+      <Step title="Get Server IP Address">
+        Contact your hosting provider or check your hosting control panel (cPanel, Plesk) for:
+        - Server IP address
+        - Any specific DNS requirements
+      </Step>
+
+      <Step title="Configure DNS Records">
+        Add these records at your domain registrar:
+
+        **For Apex Domain:**
+        ```
+        A    @    <your-server-ip>
+        ```
+
+        **For www Subdomain:**
+        ```
+        CNAME    www    @
+        ```
+        Or:
+        ```
+        A    www    <your-server-ip>
+        ```
+      </Step>
+
+      <Step title="Configure SSL Certificate">
+        Most hosting providers offer free SSL certificates:
+
+        **Using Let's Encrypt (cPanel):**
+        1. Log in to cPanel
+        2. Find **SSL/TLS Status** or **Let's Encrypt SSL"
+        3. Select your domain
+        4. Click **Issue** or **Install**
+        5. Enable **Force HTTPS Redirect**
+
+        **Manual SSL Certificate:**
+        1. Obtain SSL certificate from provider or Let's Encrypt
+        2. Upload certificate files via hosting control panel
+        3. Configure HTTPS redirect (see `.htaccess` example below)
+      </Step>
+    </Steps>
+
+    ### HTTPS Redirect (.htaccess)
+
+    Add to your `.htaccess` file to force HTTPS:
+
+    ```apache
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Redirect www to non-www (optional)
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+    ```
+
+    <Warning>
+      Ensure your hosting plan includes SSL support. External resources (Cloudinary, Vimeo) require HTTPS.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Common DNS Record Types
+
+<AccordionGroup>
+  <Accordion title="A Record">
+    Maps a domain to an IPv4 address.
+
+    **Example:**
+    ```
+    A    @    185.199.108.153
+    ```
+    - `@` represents the apex domain (mikunkishapshico.com)
+    - Points directly to a server IP address
+  </Accordion>
+
+  <Accordion title="CNAME Record">
+    Maps a domain to another domain name (canonical name).
+
+    **Example:**
+    ```
+    CNAME    www    mikunkishapshico.com
+    ```
+    - Cannot be used for apex domains on most DNS providers
+    - Commonly used for `www` subdomain
+  </Accordion>
+
+  <Accordion title="ALIAS/ANAME Record">
+    Similar to CNAME but can be used for apex domains.
+
+    **Example:**
+    ```
+    ALIAS    @    your-site.netlify.app
+    ```
+    - Not supported by all DNS providers
+    - Allows apex domain to point to another hostname
+  </Accordion>
+
+  <Accordion title="TXT Record">
+    Stores text information, often used for verification.
+
+    **Example:**
+    ```
+    TXT    @    "v=spf1 include:_spf.google.com ~all"
+    ```
+    - Used for domain verification
+    - Required for some hosting platforms
+  </Accordion>
+</AccordionGroup>
+
+## Domain Configuration Best Practices
+
+### Apex vs. www Subdomain
+
+Choose your primary domain:
+
+- **Apex domain**: `mikunkishapshico.com`
+- **www subdomain**: `www.mikunkishapshico.com`
+
+Set up redirects so both work, with one as primary:
+
+<CodeGroup>
+```apache .htaccess (www to apex)
+# Redirect www to non-www
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+```
+
+```apache .htaccess (apex to www)
+# Redirect non-www to www
+RewriteCond %{HTTP_HOST} ^(?!www\.)(.+)$ [NC]
+RewriteRule ^(.*)$ https://www.%1/$1 [R=301,L]
+```
+</CodeGroup>
+
+<Note>
+  Most modern sites use the apex domain (without www) as primary. Choose based on preference and consistency.
+</Note>
+
+### Security Considerations
+
+1. **Enable HTTPS**: Always use SSL/TLS certificates
+2. **Force HTTPS**: Redirect all HTTP traffic to HTTPS
+3. **HSTS Header**: Add HTTP Strict Transport Security
+4. **DNS Security**: Enable DNSSEC if supported by registrar
+
+### Performance Optimization
+
+1. **Use CDN**: Platforms like Netlify and Vercel include CDN
+2. **Set low TTL initially**: Use 300-600 seconds while testing
+3. **Increase TTL after stable**: Use 3600-86400 seconds for production
+4. **Enable caching headers**: See hosting configuration examples
+
+## Verification and Testing
+
+<Steps>
+  <Step title="Check DNS Propagation">
+    Use online tools to verify DNS changes:
+    - [whatsmydns.net](https://whatsmydns.net)
+    - [dnschecker.org](https://dnschecker.org)
+
+    Enter your domain and check A/CNAME records globally.
+  </Step>
+
+  <Step title="Test SSL Certificate">
+    Verify HTTPS is working:
+    - Visit `https://yourdomain.com`
+    - Check for padlock icon in browser
+    - Use [SSL Labs](https://www.ssllabs.com/ssltest/) for detailed analysis
+  </Step>
+
+  <Step title="Verify Redirects">
+    Test all domain variations:
+    - `http://yourdomain.com` → `https://yourdomain.com`
+    - `http://www.yourdomain.com` → `https://yourdomain.com` (or preferred version)
+    - Ensure consistent redirect behavior
+  </Step>
+
+  <Step title="Check External Resources">
+    - Verify Cloudinary images load correctly
+    - Confirm Vimeo videos play properly
+    - Check browser console for mixed content warnings
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Domain not resolving">
+    **Possible causes:**
+    - DNS changes haven't propagated yet (wait 24-48 hours)
+    - Incorrect DNS records (verify configuration)
+    - Nameserver changes not saved at registrar
+
+    **Solutions:**
+    - Use `nslookup yourdomain.com` or `dig yourdomain.com` to check DNS
+    - Verify records at domain registrar match hosting requirements
+    - Clear browser DNS cache or try different device/network
+  </Accordion>
+
+  <Accordion title="SSL certificate errors">
+    **Possible causes:**
+    - Certificate not yet issued (DNS verification pending)
+    - Mixed content (HTTP resources on HTTPS page)
+    - Certificate expired or misconfigured
+
+    **Solutions:**
+    - Wait for DNS propagation before requesting certificate
+    - Ensure all resources (images, scripts) use HTTPS or relative URLs
+    - Check hosting platform SSL settings and renew if needed
+  </Accordion>
+
+  <Accordion title="www subdomain not working">
+    **Possible causes:**
+    - Missing CNAME record for www
+    - Incorrect CNAME target
+    - DNS propagation delay
+
+    **Solutions:**
+    - Add CNAME record: `www` → `yourdomain.com` or hosting target
+    - Verify CNAME points to correct destination
+    - Wait for DNS propagation
+  </Accordion>
+
+  <Accordion title="Redirect loop">
+    **Possible causes:**
+    - Conflicting redirect rules
+    - Both platform and .htaccess doing redirects
+    - Incorrect SSL configuration
+
+    **Solutions:**
+    - Review .htaccess redirect rules
+    - Check hosting platform redirect settings
+    - Disable platform-level redirects if using .htaccess
+    - Clear browser cache and cookies
+  </Accordion>
+
+  <Accordion title="Cloudinary/Vimeo not loading">
+    **Possible causes:**
+    - Mixed content warnings (HTTP resources on HTTPS)
+    - External service down or account issue
+    - CORS restrictions
+
+    **Solutions:**
+    - Ensure site is served over HTTPS
+    - Verify Cloudinary/Vimeo URLs use HTTPS
+    - Check external service status and account quotas
+    - Review browser console for specific errors
+  </Accordion>
+</AccordionGroup>
+
+## Popular Domain Registrars
+
+DNS configuration steps for common registrars:
+
+<Tabs>
+  <Tab title="Namecheap">
+    1. Log in to Namecheap
+    2. Go to **Domain List** > Select your domain
+    3. Click **Advanced DNS**
+    4. Add DNS records as specified above
+    5. TTL can be set to **Automatic** or custom value
+  </Tab>
+
+  <Tab title="GoDaddy">
+    1. Log in to GoDaddy
+    2. Go to **My Products** > **Domains**
+    3. Click on your domain
+    4. Click **Manage DNS**
+    5. Add/edit DNS records as specified above
+  </Tab>
+
+  <Tab title="Google Domains">
+    1. Log in to Google Domains
+    2. Select your domain
+    3. Click **DNS** in left sidebar
+    4. Scroll to **Custom resource records**
+    5. Add DNS records as specified above
+  </Tab>
+
+  <Tab title="Cloudflare">
+    1. Log in to Cloudflare
+    2. Select your domain
+    3. Go to **DNS** tab
+    4. Add DNS records as specified above
+    5. Orange cloud = proxied (CDN), Gray cloud = DNS only
+
+    <Tip>
+      Enable Cloudflare's CDN (orange cloud) for additional performance and security benefits.
+    </Tip>
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+After configuring your custom domain:
+
+1. **Update external links**: Update any marketing materials or social media links
+2. **Configure analytics**: Update Google Analytics domain settings
+3. **Submit to search engines**: Add domain to Google Search Console
+4. **Set up monitoring**: Configure uptime monitoring for your custom domain
+5. **Test thoroughly**: Verify all functionality works on custom domain
+
+<Tip>
+  Keep your domain registration auto-renewed to prevent accidental expiration and site downtime.
+</Tip>

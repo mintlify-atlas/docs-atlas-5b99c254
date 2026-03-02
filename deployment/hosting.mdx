@@ -1,0 +1,353 @@
+---
+title: 'Hosting Options'
+description: 'Deploy the Mikunki Shapshico festival website to various hosting platforms'
+---
+
+## Overview
+
+The Mikunki Shapshico festival website is a static frontend application built with HTML, CSS, and JavaScript. It requires no backend infrastructure and can be hosted on any static hosting platform.
+
+### Requirements
+
+- Static file hosting with HTTPS support
+- No server-side processing required
+- No database needed
+- External dependencies:
+  - **Cloudinary**: Image hosting and optimization
+  - **Vimeo**: Video content hosting
+  - These services must remain accessible for media content to load properly
+
+## Hosting Platforms
+
+<Tabs>
+  <Tab title="GitHub Pages">
+    GitHub Pages offers free static hosting directly from your repository.
+
+    <Steps>
+      <Step title="Prepare Your Repository">
+        Ensure all your static files (HTML, CSS, JS, images) are in the repository root or a dedicated folder like `docs/` or `public/`.
+      </Step>
+
+      <Step title="Enable GitHub Pages">
+        1. Navigate to your repository on GitHub
+        2. Go to **Settings** > **Pages**
+        3. Under **Source**, select the branch you want to deploy (e.g., `main`)
+        4. Choose the folder: `/ (root)` or `/docs` depending on your structure
+        5. Click **Save**
+      </Step>
+
+      <Step title="Wait for Deployment">
+        GitHub will build and deploy your site. This typically takes 1-2 minutes. You'll see a green checkmark and URL when ready.
+      </Step>
+
+      <Step title="Access Your Site">
+        Your site will be available at `https://<username>.github.io/<repository-name>/`
+      </Step>
+    </Steps>
+
+    ### Custom Domain with GitHub Pages
+
+    1. Go to **Settings** > **Pages**
+    2. Under **Custom domain**, enter your domain (e.g., `mikunkishapshico.com`)
+    3. Click **Save**
+    4. GitHub will create a `CNAME` file in your repository
+    5. Configure DNS settings (see [Domain Setup](/deployment/domain-setup))
+
+    <Note>
+      GitHub Pages enforces HTTPS for custom domains. DNS propagation may take up to 24 hours.
+    </Note>
+  </Tab>
+
+  <Tab title="Netlify">
+    Netlify provides automatic deployments, instant previews, and excellent performance.
+
+    <Steps>
+      <Step title="Connect Repository">
+        1. Sign up or log in to [Netlify](https://netlify.com)
+        2. Click **Add new site** > **Import an existing project**
+        3. Choose your Git provider (GitHub, GitLab, or Bitbucket)
+        4. Authorize Netlify and select your repository
+      </Step>
+
+      <Step title="Configure Build Settings">
+        Since this is a static site with no build process:
+        - **Build command**: Leave empty (or add if you have a build step)
+        - **Publish directory**: `.` (root) or specify your static files directory
+        - Click **Deploy site**
+      </Step>
+
+      <Step title="Deployment Complete">
+        Netlify will deploy your site and provide a URL like `https://random-name-123456.netlify.app`
+      </Step>
+    </Steps>
+
+    ### Optional: Add netlify.toml Configuration
+
+    Create a `netlify.toml` file in your repository root for additional configuration:
+
+    ```toml
+    [build]
+      publish = "."
+      command = ""
+
+    [[redirects]]
+      from = "/*"
+      to = "/index.html"
+      status = 200
+
+    [[headers]]
+      for = "/*"
+      [headers.values]
+        X-Frame-Options = "DENY"
+        X-XSS-Protection = "1; mode=block"
+        X-Content-Type-Options = "nosniff"
+        Referrer-Policy = "strict-origin-when-cross-origin"
+
+    [[headers]]
+      for = "/*.css"
+      [headers.values]
+        Cache-Control = "public, max-age=31536000, immutable"
+
+    [[headers]]
+      for = "/*.js"
+      [headers.values]
+        Cache-Control = "public, max-age=31536000, immutable"
+
+    [[headers]]
+      for = "/*.jpg"
+      [headers.values]
+        Cache-Control = "public, max-age=31536000, immutable"
+
+    [[headers]]
+      for = "/*.png"
+      [headers.values]
+        Cache-Control = "public, max-age=31536000, immutable"
+    ```
+
+    <Tip>
+      Netlify automatically deploys on every push to your main branch and provides deploy previews for pull requests.
+    </Tip>
+  </Tab>
+
+  <Tab title="Vercel">
+    Vercel offers excellent performance with edge network deployment.
+
+    <Steps>
+      <Step title="Import Project">
+        1. Sign up or log in to [Vercel](https://vercel.com)
+        2. Click **Add New** > **Project**
+        3. Import your Git repository
+        4. Select the repository containing your festival website
+      </Step>
+
+      <Step title="Configure Project">
+        - **Framework Preset**: Other (or leave as detected)
+        - **Build Command**: Leave empty for static sites
+        - **Output Directory**: `.` or your static files directory
+        - Click **Deploy**
+      </Step>
+
+      <Step title="Deployment Complete">
+        Vercel will deploy your site to a URL like `https://your-project.vercel.app`
+      </Step>
+    </Steps>
+
+    ### Optional: Add vercel.json Configuration
+
+    Create a `vercel.json` file in your repository root:
+
+    ```json
+    {
+      "version": 2,
+      "public": true,
+      "headers": [
+        {
+          "source": "/(.*)",
+          "headers": [
+            {
+              "key": "X-Frame-Options",
+              "value": "DENY"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-XSS-Protection",
+              "value": "1; mode=block"
+            },
+            {
+              "key": "Referrer-Policy",
+              "value": "strict-origin-when-cross-origin"
+            }
+          ]
+        },
+        {
+          "source": "/(.*\\.(css|js|jpg|jpeg|png|gif|svg|woff|woff2))$",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "public, max-age=31536000, immutable"
+            }
+          ]
+        }
+      ]
+    }
+    ```
+
+    <Note>
+      Vercel provides automatic HTTPS, global CDN, and continuous deployment from Git.
+    </Note>
+  </Tab>
+
+  <Tab title="Traditional Hosting">
+    Deploy to traditional web hosting via FTP/SFTP (cPanel, shared hosting, VPS).
+
+    <Steps>
+      <Step title="Prepare Your Files">
+        1. Ensure all files are ready for deployment
+        2. Verify all paths are relative (not absolute)
+        3. Test locally before uploading
+      </Step>
+
+      <Step title="Connect via FTP/SFTP">
+        Use an FTP client like FileZilla, Cyberduck, or your hosting provider's file manager:
+        - **Host**: Your hosting server address
+        - **Username**: FTP username from hosting provider
+        - **Password**: FTP password
+        - **Port**: 21 (FTP) or 22 (SFTP)
+      </Step>
+
+      <Step title="Upload Files">
+        1. Navigate to your web root directory (usually `public_html/`, `www/`, or `htdocs/`)
+        2. Upload all website files and folders
+        3. Maintain the directory structure
+      </Step>
+
+      <Step title="Verify Deployment">
+        Visit your domain to confirm the site is live and functioning correctly.
+      </Step>
+    </Steps>
+
+    ### .htaccess Configuration (Apache Servers)
+
+    Create a `.htaccess` file in your web root for additional configuration:
+
+    ```apache
+    # Force HTTPS
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Security Headers
+    <IfModule mod_headers.c>
+      Header set X-Frame-Options "DENY"
+      Header set X-Content-Type-Options "nosniff"
+      Header set X-XSS-Protection "1; mode=block"
+      Header set Referrer-Policy "strict-origin-when-cross-origin"
+    </IfModule>
+
+    # Cache Control
+    <IfModule mod_expires.c>
+      ExpiresActive On
+      ExpiresByType text/css "access plus 1 year"
+      ExpiresByType application/javascript "access plus 1 year"
+      ExpiresByType image/jpeg "access plus 1 year"
+      ExpiresByType image/png "access plus 1 year"
+      ExpiresByType image/gif "access plus 1 year"
+      ExpiresByType image/svg+xml "access plus 1 year"
+    </IfModule>
+
+    # Compression
+    <IfModule mod_deflate.c>
+      AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript
+    </IfModule>
+    ```
+
+    <Warning>
+      Ensure your hosting provider supports HTTPS. External resources (Cloudinary, Vimeo) require HTTPS for security.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Post-Deployment Checklist
+
+After deploying, verify the following:
+
+<AccordionGroup>
+  <Accordion title="Media Content Loading">
+    - Cloudinary images are displaying correctly
+    - Vimeo videos are playing properly
+    - All external resources load over HTTPS
+  </Accordion>
+
+  <Accordion title="Performance">
+    - Page load times are acceptable
+    - Images are optimized and responsive
+    - CSS and JavaScript files are loading
+  </Accordion>
+
+  <Accordion title="Functionality">
+    - All navigation links work
+    - Forms submit correctly (if applicable)
+    - Responsive design works on mobile devices
+    - Browser compatibility (Chrome, Firefox, Safari, Edge)
+  </Accordion>
+
+  <Accordion title="Security">
+    - Site is served over HTTPS
+    - Security headers are configured
+    - No mixed content warnings
+  </Accordion>
+</AccordionGroup>
+
+## Continuous Deployment
+
+For automatic deployments when you update your code:
+
+- **GitHub Pages**: Automatically deploys on push to the configured branch
+- **Netlify**: Deploys on every push to main branch; provides deploy previews for PRs
+- **Vercel**: Deploys on every push; creates preview URLs for branches
+- **Traditional Hosting**: Requires manual FTP uploads or CI/CD setup
+
+<Tip>
+  For the best developer experience, use Netlify or Vercel for automatic deployments, preview URLs, and easy rollbacks.
+</Tip>
+
+## Monitoring and Analytics
+
+Consider adding:
+
+- **Google Analytics**: Track visitor behavior and traffic
+- **Google Search Console**: Monitor search performance and indexing
+- **Uptime monitoring**: Services like UptimeRobot or Pingdom
+- **Performance monitoring**: Google PageSpeed Insights, Lighthouse
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Images not loading from Cloudinary">
+    - Verify Cloudinary URLs are correct and accessible
+    - Check that your site is served over HTTPS
+    - Confirm Cloudinary account is active and has sufficient quota
+  </Accordion>
+
+  <Accordion title="Videos not playing from Vimeo">
+    - Ensure Vimeo embed codes are correct
+    - Verify privacy settings allow embedding
+    - Check that videos are published and accessible
+  </Accordion>
+
+  <Accordion title="404 errors on deployment">
+    - Verify file paths are relative, not absolute
+    - Check that all referenced files exist
+    - Ensure proper directory structure is maintained
+  </Accordion>
+
+  <Accordion title="Site not updating after push">
+    - Clear browser cache
+    - Wait for build to complete (check deployment logs)
+    - Verify correct branch is configured for deployment
+    - Clear CDN cache if applicable
+  </Accordion>
+</AccordionGroup>
